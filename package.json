@@ -1,0 +1,28 @@
+{
+  "name": "storyrunner",
+  "description": "Storybook setup.",
+  "license": "MIT",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "bin": {
+    "storyrunner": "./bin/midgard-stories.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc -w --preserveWatchOutput"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@types/react": "^17.0.8",
+    "playwright": "1.6.2",
+    "react": "^17.0.2"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "@types/node": "^15.6.1",
+    "typescript": "4.1.2"
+  },
+  "sideEffects": false
+}

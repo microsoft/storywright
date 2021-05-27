@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "jsx": "react",
+    "module": "commonjs",
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "moduleResolution": "Node",
+    //"noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "declaration": true,
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "declarationMap": false,
+    "composite": true,
+    "tsBuildInfoFile": "./lib/tsconfig.tsbuildinfo"
+  },
+  "include": ["./src"]
+}
