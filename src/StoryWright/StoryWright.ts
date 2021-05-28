@@ -1,7 +1,7 @@
 import {createElement, useEffect } from 'react';
 import executeSteps from './executeSteps';
 
-export const StoryRunner = p => {
+export const StoryWright = p => {
 
   useEffect(() => {
     console.log('steps:', p);

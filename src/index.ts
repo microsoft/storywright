@@ -1,3 +1,3 @@
 export * from './StoryWright/Steps';
-export * from './StoryWright/StoryRunner';
+export * from './StoryWright/StoryWright';
 export * from './StoryWright/Keys';
