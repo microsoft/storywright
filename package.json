@@ -1,5 +1,5 @@
 {
-  "name": "storyrunner",
+  "name": "storywright",
   "description": "Storybook setup.",
   "license": "MIT",
   "version": "0.0.1",
@@ -7,7 +7,7 @@
   "module": "lib/index.js",
   "typings": "lib/index.d.ts",
   "bin": {
-    "storyrunner": "./bin/midgard-stories.js"
+    "storywright": "./bin/storywright.js"
   },
   "scripts": {
     "build": "tsc",
