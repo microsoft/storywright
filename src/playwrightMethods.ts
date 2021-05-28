@@ -17,6 +17,29 @@ const exposePlaywright = async (page: any, context: any, path: String, ssNamePre
     await page.exposeFunction('pressKey', pressKeyAsync);
     await page.exposeFunction('executeScript', executeScriptAsync);
     await page.exposeFunction('focus', focusAsync);
+    await page.exposeFunction('mouseDown', mouseDownAsync);
+    await page.exposeFunction('mouseUp', mouseUpAsync);
+
+    async function mouseUpAsync(selector: string) {
+      console.log(`mouseUp element \"${selector}\"...`);
+      await page.mouse.up();
+      console.log(`mouseUped element \"${selector}\"...`);
+    }
+
+    async function mouseDownAsync(selector: string) {
+      let element;
+      if(selector.charAt(0) === '#'){
+        console.log(`Finding element by id: id=${selector.substring(1, selector.length)}`);
+        element = await page.$(`id=${selector.substring(1, selector.length)}`)
+      }else{
+        element = await page.$(`${selector}`);
+      }
+      console.log(`mouseDown element: ${element}...`);
+      const box = await element.boundingBox();
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      console.log(`mouseDowned element ${element}...`);
+    }
 
     async function focusAsync(selector: string) {
       console.log(`Focusing element \"${selector}\"...`);
@@ -44,20 +67,26 @@ const exposePlaywright = async (page: any, context: any, path: String, ssNamePre
     }
 
     async function makeScreenshotAsync(testName: string, screenshotsPath: string) {
+      console.log(`screenshotPath, testName: ${screenshotsPath}`);
       if (!fs.existsSync(screenshotsPath)) {
         fs.mkdirSync(screenshotsPath, { recursive: true });
       }
 
       console.log(`Taking screenshot for ${testName}...`);
+      ssNamePrefix = ssNamePrefix.replace(/#/g, "^^");
       await page.screenshot({
-        path: `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`,
+        // path: `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`,
+        path: `${path}\\${ssNamePrefix}^^${testName}.png`
       });
       console.log('Screenshot taken', `${path}\${testName}.${'browserType'}.png`);
     }
 
     async function clickAsync(selector: string) {
       console.log(`Clicking element for  ${selector}...`);
-      await page.click(`${selector}`);
+      const element = await page.$(`${selector}`);
+      await element.click({
+        force: true
+      });
       console.log('Item clicked');
     }
 
@@ -65,13 +94,18 @@ const exposePlaywright = async (page: any, context: any, path: String, ssNamePre
       console.log(`Selecting element for  ${selector}...`);
       console.log(`testName  ${testName}...`);
       const element = await page.$(`${selector}`);
-      await element.screenshot({ path: `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png` });
+      // await element.screenshot({ path: `${path}\\${ssNamePrefix^^${testName}^^${'browserType'}.png` });
+      await element.screenshot({ path: `${path}\\${ssNamePrefix}^^${testName}.png` });
       console.log('element screenshot taken: ', `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`);
     }
 
     async function hoverAsync(selector: string) {
       console.log(`Hovering element for  ${selector}...`);
-      await page.hover(`${selector}`);
+      const element = await page.$(`${selector}`);
+      await element.hover({
+        force: true
+      });
+      console.log(`Hovered element ${selector}...`);
     }
 
     async function waitForSelectorAsync(selector: string) {
