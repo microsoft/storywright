@@ -3,6 +3,7 @@ import * as argv from 'yargs';
 import { Browser } from './StoryWrightProcessor/Constants';
 import { StoryWrightOptions } from './StoryWrightProcessor/StoryWrightOptions';
 import { StoryWrightProcessor } from './StoryWrightProcessor/StoryWrightProcessor';
+import { resolve } from 'path';
 const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     .option('url', {
         alias: 'storybookurl',
@@ -34,18 +35,17 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
 
 console.log(args);
 
+let url = (args.url.indexOf("http") > -1) ? args.url : resolve(args.url);
 console.log(`================ Starting story right execution =================`);
-console.log(`Storybook url = ${args.url}`);
+console.log(`Storybook url = ${url}`);
 console.log(`Screenshot destination path = ${args.destpath}`);
 console.log(`Browsers = ${args.browsers}`);
 console.log(`================ Starting story right execution =================`);
 
 const storyWrightOptions: StoryWrightOptions = {
-    url: args.url,
+    url: url,
     screenShotDestPath: args.destpath,
     browsers: args.browsers
 };
 
 StoryWrightProcessor.process(storyWrightOptions);
-
-
