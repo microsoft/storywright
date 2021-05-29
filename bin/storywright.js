@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require("../lib/storywright");
+require("../lib/main");
