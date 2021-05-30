@@ -21,7 +21,7 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     })
     .option('browsers', {
         alias: 'browsers',
-        default: [Browser.Chromium, Browser.Firefox],
+        default: [Browser.Chromium],
         describe: 'Command to run',
         nargs: 1,
         type: "array",

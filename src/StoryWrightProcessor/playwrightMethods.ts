@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { Page } from 'playwright';
 
-const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String): Promise<any | void> => {
+const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String, browserName: string): Promise<any | void> => {
   console.log('exposing playwright');
 
   return new Promise<void>(async resolve => {
@@ -76,9 +76,9 @@ const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String):
       ssNamePrefix = ssNamePrefix.replace(/#/g, "^^");
       await page.screenshot({
         // path: `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`,
-        path: `${path}\\${ssNamePrefix}^^${testName}.png`
+        path: `${path}\\${ssNamePrefix}^^${testName}^^${browserName}.png`
       });
-      console.log('Screenshot taken', `${path}\${testName}.${'browserType'}.png`);
+      console.log('Screenshot taken', `${path}\${testName}.${browserName}.png`);
     }
 
     async function clickAsync(selector: string) {
@@ -95,8 +95,8 @@ const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String):
       console.log(`testName  ${testName}...`);
       const element = await page.$(`${selector}`);
       // await element.screenshot({ path: `${path}\\${ssNamePrefix^^${testName}^^${'browserType'}.png` });
-      await element.screenshot({ path: `${path}\\${ssNamePrefix}^^${testName}.png` });
-      console.log('element screenshot taken: ', `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`);
+      await element.screenshot({ path: `${path}\\${ssNamePrefix}^^${testName}^^${browserName}.png` });
+      console.log('element screenshot taken: ', `${path}\\${ssNamePrefix}#${testName}#${browserName}.png`);
     }
 
     async function hoverAsync(selector: string) {
@@ -124,7 +124,6 @@ const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String):
         console.log(`Closing the page`);
         await page.close();
       }
-      resolve();
     }
 
     resolve();

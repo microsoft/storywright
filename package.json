@@ -16,7 +16,7 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@types/react": "^17.0.8",
-    "playwright": "1.6.2",
+    "playwright": "1.11.1",
     "react": "^17.0.2",
     "yargs": "^16.2.0"
   },
