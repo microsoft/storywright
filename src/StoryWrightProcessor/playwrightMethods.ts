@@ -1,10 +1,10 @@
 import * as fs from 'fs';
+import { Page } from 'playwright';
 
-const exposePlaywright = async (page: any, context: any, path: String, ssNamePrefix: String): Promise<any | void> => {
+const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String, browserName: string): Promise<any | void> => {
   console.log('exposing playwright');
 
   return new Promise<void>(async resolve => {
-    context;
     // context.setDefaultNavigationTimeout(120000);
     await page.exposeFunction('makeScreenshot', makeScreenshotAsync);
     await page.exposeFunction('click', clickAsync);
@@ -28,10 +28,10 @@ const exposePlaywright = async (page: any, context: any, path: String, ssNamePre
 
     async function mouseDownAsync(selector: string) {
       let element;
-      if(selector.charAt(0) === '#'){
+      if (selector.charAt(0) === '#') {
         console.log(`Finding element by id: id=${selector.substring(1, selector.length)}`);
         element = await page.$(`id=${selector.substring(1, selector.length)}`)
-      }else{
+      } else {
         element = await page.$(`${selector}`);
       }
       console.log(`mouseDown element: ${element}...`);
@@ -76,9 +76,9 @@ const exposePlaywright = async (page: any, context: any, path: String, ssNamePre
       ssNamePrefix = ssNamePrefix.replace(/#/g, "^^");
       await page.screenshot({
         // path: `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`,
-        path: `${path}\\${ssNamePrefix}^^${testName}.png`
+        path: `${path}\\${ssNamePrefix}^^${testName}^^${browserName}.png`
       });
-      console.log('Screenshot taken', `${path}\${testName}.${'browserType'}.png`);
+      console.log('Screenshot taken', `${path}\${testName}.${browserName}.png`);
     }
 
     async function clickAsync(selector: string) {
@@ -95,8 +95,8 @@ const exposePlaywright = async (page: any, context: any, path: String, ssNamePre
       console.log(`testName  ${testName}...`);
       const element = await page.$(`${selector}`);
       // await element.screenshot({ path: `${path}\\${ssNamePrefix^^${testName}^^${'browserType'}.png` });
-      await element.screenshot({ path: `${path}\\${ssNamePrefix}^^${testName}.png` });
-      console.log('element screenshot taken: ', `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`);
+      await element.screenshot({ path: `${path}\\${ssNamePrefix}^^${testName}^^${browserName}.png` });
+      console.log('element screenshot taken: ', `${path}\\${ssNamePrefix}#${testName}#${browserName}.png`);
     }
 
     async function hoverAsync(selector: string) {
@@ -115,19 +115,15 @@ const exposePlaywright = async (page: any, context: any, path: String, ssNamePre
 
     async function waitForNotFoundAsync(selector: string) {
       console.log(`Waiting for element for  ${selector}... to detach`);
-      await page.waitForSelector(`${selector}`, 'detached');
+      //await page.waitForSelector(`${selector}`, 'detached');
     }
 
     async function doneAsync(shouldCloseWhenDone: string) {
       console.log(`StoryRunner done`);
       if (shouldCloseWhenDone) {
-        console.log(`Closing the page and the browser`);
+        console.log(`Closing the page`);
         await page.close();
-        console.log(`Page is closed`);
-        // await browser.close();
-        console.log(`Browser is closed`);
       }
-      resolve();
     }
 
     resolve();

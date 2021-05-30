@@ -1,5 +1,6 @@
 export interface StoryWrightOptions {
-    url: string;
-    screenShotDestPath: string;
-    browsers: string;
-  }
+  url: string;
+  screenShotDestPath: string;
+  browsers: Array<string>;
+  headless: boolean;
+}
