@@ -19,10 +19,9 @@ export class StoryWrightProcessor {
         await page.close();
         console.log(`${stories.length} stories found`);
         let screenshotIndex = 0;
-        const batchSize = 1;
         let position = 0;
         while (position < stories.length) {
-          const itemsForBatch = stories.slice(position, position + batchSize);
+          const itemsForBatch = stories.slice(position, position + options.concurrency);
           await Promise.all(
             itemsForBatch.map(async (story: object, index: number) => {
               const id: string = story['id'];
@@ -60,7 +59,7 @@ export class StoryWrightProcessor {
           ).catch(reason => {
             console.log(reason);
           });
-          position += batchSize;
+          position += options.concurrency;
         }
       }
     }
