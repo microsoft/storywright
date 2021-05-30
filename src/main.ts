@@ -30,6 +30,13 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
         },
         choices: [Browser.Chromium, Browser.Firefox]
     })
+    .option('headless', {
+        alias: 'headless',
+        default: false,
+        describe: 'Command to run',
+        nargs: 1,
+        type: "boolean"
+    })
     .example('$0', 'Captures screenshot for all stories using default static storybook path dist/iframe.html')
     .example('$0 -url https://localhost:5555', 'Captures screenshot for all stories from given storybook url').argv;
 
@@ -40,12 +47,14 @@ console.log(`================ Starting story right execution =================`)
 console.log(`Storybook url = ${url}`);
 console.log(`Screenshot destination path = ${args.destpath}`);
 console.log(`Browsers = ${args.browsers}`);
+console.log(`Headless = ${args.headless}`);
 console.log(`================ Starting story right execution =================`);
 
 const storyWrightOptions: StoryWrightOptions = {
     url: url,
     screenShotDestPath: args.destpath,
-    browsers: args.browsers
+    browsers: args.browsers,
+    headless: args.headless
 };
 
 StoryWrightProcessor.process(storyWrightOptions);

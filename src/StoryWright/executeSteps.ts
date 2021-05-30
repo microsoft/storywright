@@ -1,11 +1,16 @@
 import TestExecutorActions from './TestExecutorActions';
 
-const executesteps = async steps => {
+const executesteps = async (steps: Array<any>) => {
   console.log('TestExecutorActions: ', TestExecutorActions);
-
+  console.log(`${Date.now()} :: Sleeping start`);
+  //await new Promise(r => setTimeout(r, 15000));
+  console.log(`${Date.now()} :: Sleeping end`);
+  if (steps === null) {
+    console.log("Steps object is null");
+    return;
+  }
   let i = 0;
-  // steps = steps.steps;
-  console.log('steps.length: ', steps);
+  console.log(`steps.length: `, steps.length);
 
   for (let j = 0; j < steps.length; j++) {
     console.log('steps: ', steps[j]);
@@ -44,30 +49,28 @@ const executesteps = async steps => {
         console.log('hover');
       });
     } else if (steps[j]['type'] === 'sendKeys') {
-      if(steps[j].keys === ''){
+      if (steps[j].keys === '') {
         await TestExecutorActions.focus(steps[j].locator.value, () => {
           console.log('focusing element');
         });
-      }else{
+      } else {
         await TestExecutorActions.pressKey(steps[j].locator.value, steps[j].keys, () => {
           console.log('pressing keys');
         });
       }
-      
+
     } else if (steps[j]['type'] === 'executeScript') {
       await TestExecutorActions.executeScript(steps[j].code, () => {
         console.log('executing script');
       });
-    } 
-    // else if (steps[j]['type'] === 'clickAndHoldElement') {
-    //   await TestExecutorActions.mouseDown(steps[j].code, () => {
-    //     console.log('clickAndHoldElement');
-    //   })
-    // } 
+    }
     else {
       console.log(`step not found`);
     }
   }
+  await TestExecutorActions.done(true, () => {
+    console.log('Calling done');
+  });
 };
 
 export default executesteps;
