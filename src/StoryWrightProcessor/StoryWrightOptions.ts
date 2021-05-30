@@ -3,4 +3,5 @@ export interface StoryWrightOptions {
   screenShotDestPath: string;
   browsers: Array<string>;
   headless: boolean;
+  concurrency: number;
 }
