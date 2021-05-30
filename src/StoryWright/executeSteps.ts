@@ -2,9 +2,6 @@ import TestExecutorActions from './TestExecutorActions';
 
 const executesteps = async (steps: Array<any>) => {
   console.log('TestExecutorActions: ', TestExecutorActions);
-  console.log(`${Date.now()} :: Sleeping start`);
-  //await new Promise(r => setTimeout(r, 15000));
-  console.log(`${Date.now()} :: Sleeping end`);
   if (steps === null) {
     console.log("Steps object is null");
     return;
