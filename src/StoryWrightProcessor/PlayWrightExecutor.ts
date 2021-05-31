@@ -124,8 +124,8 @@ export class PlayWrightExecutor {
   }
 
   public getScreenshotPath(testName: String) {
-    this.ssNamePrefix = this.ssNamePrefix.replace(/#/g, "^^").replace(/:/g, "-");
-    testName = testName.replace(/#/g, "^^").replace(/:/g, "-");
+    this.ssNamePrefix = this.ssNamePrefix.replace(/:/g, "-");
+    testName = testName.replace(/:/g, "-");
     let screenshotPath = `${this.path}\\${this.ssNamePrefix}^^${testName}^^${this.browserName}`;
 
     //INFO: Append file prefix if screenshot with same name exist.
