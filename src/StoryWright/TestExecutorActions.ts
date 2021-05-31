@@ -16,43 +16,43 @@ const TestExecutorWindow = (window as unknown) as {
 };
 
 export default {
-  focus: async (selector: string, callback: () => void): Promise<any> => {
-    await TestExecutorWindow.focus(selector).then(callback);
+  focus: async (selector: string): Promise<any> => {
+    await TestExecutorWindow.focus(selector);
   },
-  executeScript: async (script: string, callback: () => void): Promise<any> => {
-    await TestExecutorWindow.executeScript(script).then(callback);
+  executeScript: async (script: string): Promise<any> => {
+    await TestExecutorWindow.executeScript(script);
   },
-  mouseDown: async (selector: string, callback: () => void): Promise<any> => {
-    await TestExecutorWindow.mouseDown(selector).then(callback);
+  mouseDown: async (selector: string): Promise<any> => {
+    await TestExecutorWindow.mouseDown(selector);
   },
-  mouseUp: async (callback: () => void): Promise<any> => {
-    await TestExecutorWindow.mouseUp().then(callback);
+  mouseUp: async (): Promise<any> => {
+    await TestExecutorWindow.mouseUp();
   },
-  pressKey: async (selector: string, key: string, callback: () => void): Promise<any> => {
-    await TestExecutorWindow.pressKey(selector, key).then(callback);
+  pressKey: async (selector: string, key: string): Promise<any> => {
+    await TestExecutorWindow.pressKey(selector, key);
   },
-  makeScreenshot: async (testName: string, callback: () => void): Promise<any> => {
-    await TestExecutorWindow.makeScreenshot(testName).then(callback);
+  makeScreenshot: async (testName: string): Promise<any> => {
+    await TestExecutorWindow.makeScreenshot(testName);
   },
-  done: async (callback: () => void) => {
-    await TestExecutorWindow.done().then(callback);
+  done: async () => {
+    await TestExecutorWindow.done();
   },
-  hover: async (selector: string, callback: () => void) => {
-    await TestExecutorWindow.hover(selector).then(callback);
+  hover: async (selector: string) => {
+    await TestExecutorWindow.hover(selector);
   },
-  wait: async (selector: string, callback: () => void) => {
-    await TestExecutorWindow.wait(selector).then(callback);
+  wait: async (selector: string) => {
+    await TestExecutorWindow.wait(selector);
   },
-  waitForNotFound: async (selector: string, callback: () => void) => {
-    await TestExecutorWindow.waitForNotFound(selector).then(callback);
+  waitForNotFound: async (selector: string) => {
+    await TestExecutorWindow.waitForNotFound(selector);
   },
-  click: async (selector: string, callback: () => void) => {
-    await TestExecutorWindow.click(selector).then(callback);
+  click: async (selector: string) => {
+    await TestExecutorWindow.click(selector);
   },
-  elementScreenshot: async (selector: string, testName: string, callback: () => void) => {
-    await TestExecutorWindow.elementScreenshot(selector, testName).then(callback);
+  elementScreenshot: async (selector: string, testName: string) => {
+    await TestExecutorWindow.elementScreenshot(selector, testName);
   },
-  setElementText: async (selector: string, text: string, callback: () => void) => {
-    await TestExecutorWindow.setElementText(selector, text).then(callback);
+  setElementText: async (selector: string, text: string) => {
+    await TestExecutorWindow.setElementText(selector, text);
   },
 };

@@ -1,16 +1,10 @@
-import {createElement, useEffect } from 'react';
-import executeSteps from './executeSteps';
+import { createElement, useEffect } from 'react';
+import { BrowserExecutor } from './BrowserExecutor';
 
 export const StoryWright = p => {
 
   useEffect(() => {
-    console.log('steps:', p);
-    executeSteps(p.steps);
+    BrowserExecutor.executesteps(p.steps);
   }, []);
   return createElement('div', null, p.children);
 };
-
-// exports.default = StoryRunner;
-// exports.Steps = require('./steps');
-
-// module.exports = extend(exports.default, exports);
