@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { Browser, Page } from 'playwright';
 import { BrowserUtils } from './BrowserUtils';
-import exposePlaywright from './playwrightMethods';
+import { PlayWrightExecutor } from './PlayWrightExecutor';
 import { StoryWrightOptions } from './StoryWrightOptions'
 
 /**
@@ -34,7 +34,7 @@ export class StoryWrightProcessor {
           await Promise.all(
             itemsForBatch.map(async (story: object, index: number) => {
               const id: string = story['id'];
-              const ssNamePrefix = `${story['kind']}#${story['name']}`;
+              const ssNamePrefix = `${story['kind']}^^${story['name']}`;
               const logPrefix = `story:${index + 1}/${stories.length}`;
               if (
                 !id.includes('DocumentTitle'.toLowerCase())
@@ -53,7 +53,7 @@ export class StoryWrightProcessor {
                   width: 1920,
                   height: 964,
                 });
-                await exposePlaywright(page, options.screenShotDestPath, ssNamePrefix, browserName);
+                await new PlayWrightExecutor(page, options.screenShotDestPath, ssNamePrefix, browserName).exposeFunctions();
 
                 console.log('Rendering story: ');
                 await page.goto(join(options.url, `iframe.html?id=${id}`));

@@ -39,17 +39,19 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     })
     .option('concurrency', {
         alias: 'concurrency',
-        default: 4,
+        default: 8,
         describe: 'Number of browser tabs to open in parallel',
-        nargs: 4,
+        nargs: 1,
         type: "number"
     })
     .example('$0', 'Captures screenshot for all stories using default static storybook path dist/iframe.html')
     .example('$0 -url https://localhost:5555 --browsers chromium', 'Captures screenshot for all stories from given storybook url for chromium browser').argv;
 
-console.log(args);
+// When https url is passed no modification required. 
+// When file path is provided it needs to be converted to absolute path and file:/// needs to be added to support firefox browser.
 
-let url = (args.url.indexOf("http") > -1) ? args.url : 'file:///' + resolve(args.url);
+const url: string = (args.url.indexOf("http") > -1) ? args.url : 'file:///' + resolve(args.url);
+
 console.log(`================ StoryWright params =================`);
 console.log(`Storybook url = ${url}`);
 console.log(`Screenshot destination path = ${args.destpath}`);
