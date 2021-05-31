@@ -8,21 +8,21 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     .option('url', {
         alias: 'storybookurl',
         default: 'dist',
-        describe: 'Command to run',
+        describe: 'Url to story book. Can be relative path to folder like dist or server url http://localhost:5555',
         nargs: 1,
         type: "string"
     })
     .option('destpath', {
         alias: 'screenshotdestpath',
         default: 'dist/screenshots/storybook',
-        describe: 'Command to run',
+        describe: 'Output directory path where screenshots should be stored',
         nargs: 1,
         type: "string"
     })
     .option('browsers', {
         alias: 'browsers',
         default: [Browser.Chromium, Browser.Firefox],
-        describe: 'Command to run',
+        describe: 'Comma seperated list of browsers to support',
         nargs: 1,
         type: "array",
         coerce: array => {
@@ -33,19 +33,19 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     .option('headless', {
         alias: 'headless',
         default: false,
-        describe: 'Command to run',
+        describe: 'True if browser needs to be launced in headless mode else false',
         nargs: 1,
         type: "boolean"
     })
     .option('concurrency', {
         alias: 'concurrency',
         default: 4,
-        describe: 'Command to run',
+        describe: 'Number of browser tabs to open in parallel',
         nargs: 4,
         type: "number"
     })
     .example('$0', 'Captures screenshot for all stories using default static storybook path dist/iframe.html')
-    .example('$0 -url https://localhost:5555', 'Captures screenshot for all stories from given storybook url').argv;
+    .example('$0 -url https://localhost:5555 --browsers chromium', 'Captures screenshot for all stories from given storybook url for chromium browser').argv;
 
 console.log(args);
 
