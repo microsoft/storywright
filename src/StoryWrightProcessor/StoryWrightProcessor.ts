@@ -74,7 +74,7 @@ export class StoryWrightProcessor {
       }
       finally {
         console.log('Closing process !!');
-        if (browser.isConnected) {
+        if (browser != null && browser.isConnected) {
           browser.close();
         }
       }
