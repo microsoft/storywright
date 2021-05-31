@@ -1,7 +1,7 @@
 export class Steps {
   steps = [];
 
-  public snapshot(name: string, opts: any) {
+  public snapshot(name: string, opts?: any) {
     var step = {
       type: 'saveScreenshot',
       name: name,
@@ -31,7 +31,7 @@ export class Steps {
     return this.steps;
   }
 
-  public click(selector, options) {
+  public click(selector, options?) {
     var step = {
       type: 'clickElement',
       locator: {
@@ -89,7 +89,7 @@ export class Steps {
     return this;
   }
 
-  public setValue(selector, text, options) {
+  public setValue(selector, text, options?) {
     var step = {
       type: 'setElementText',
       locator: {
@@ -135,7 +135,7 @@ export class Steps {
     return this.keys(selector, '');
   }
 
-  public executeScript(code, isAsync) {
+  public executeScript(code, isAsync?) {
     var step = {
       type: 'executeScript',
       code: code,
@@ -168,7 +168,7 @@ export class Steps {
     return this;
   }
 
-  public wait(msOrSelector, options) {
+  public wait(msOrSelector, options?) {
     var step;
     if (typeof msOrSelector === 'number') {
       step = {
@@ -191,7 +191,7 @@ export class Steps {
     return this;
   }
 
-  public waitForNotFound(selector, options) {
+  public waitForNotFound(selector, options?) {
     var step = {
       type: 'waitForElementNotPresent',
       locator: {
