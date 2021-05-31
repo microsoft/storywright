@@ -37,12 +37,13 @@ export class StoryWrightProcessor {
               const ssNamePrefix = `${story['kind']}#${story['name']}`;
               const logPrefix = `story:${index + 1}/${stories.length}`;
               if (
-                id.includes('header') &&
-                !id.includes('headerribbontoggle') &&
-                !id.includes('sharedheaderplaceholder')
-                //  || id.includes('documenttitle')
+                !id.includes('DocumentTitle'.toLowerCase())
+                // && !id.includes('ContextMenuCompoundButton'.toLowerCase())
+                // && !id.includes('Floatie'.toLowerCase())
+                // && !id.includes('ChartEditTitleDialog'.toLowerCase())
+                // && !id.includes('ChartEditDataDialog'.toLowerCase())
               ) {
-                //console.log(`header encountered. Returning: ${id}`);
+                // console.log(`header encountered. Returning: ${id}`);
                 return;
               }
               try {

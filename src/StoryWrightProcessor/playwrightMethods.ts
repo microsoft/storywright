@@ -3,9 +3,8 @@ import { Page } from 'playwright';
 
 const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String, browserName: string): Promise<any | void> => {
   console.log('exposing playwright');
-
+  let fileSuffix = 0;
   return new Promise<void>(async resolve => {
-    // context.setDefaultNavigationTimeout(120000);
     await page.exposeFunction('makeScreenshot', makeScreenshotAsync);
     await page.exposeFunction('click', clickAsync);
     await page.exposeFunction('hover', hoverAsync);
@@ -66,21 +65,6 @@ const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String, 
       console.log('Text inserted');
     }
 
-    async function makeScreenshotAsync(testName: string, screenshotsPath: string) {
-      console.log(`screenshotPath, testName: ${screenshotsPath}`);
-      if (!fs.existsSync(screenshotsPath)) {
-        fs.mkdirSync(screenshotsPath, { recursive: true });
-      }
-
-      console.log(`Taking screenshot for ${testName}...`);
-      ssNamePrefix = ssNamePrefix.replace(/#/g, "^^");
-      await page.screenshot({
-        // path: `${path}\\${ssNamePrefix}#${testName}#${'browserType'}.png`,
-        path: `${path}\\${ssNamePrefix}^^${testName}^^${browserName}.png`
-      });
-      console.log('Screenshot taken', `${path}\${testName}.${browserName}.png`);
-    }
-
     async function clickAsync(selector: string) {
       console.log(`Clicking element for  ${selector}...`);
       const element = await page.$(`${selector}`);
@@ -89,14 +73,25 @@ const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String, 
       });
       console.log('Item clicked');
     }
+    
+    async function makeScreenshotAsync(testName: string) {
+      let screenshotPath = getScreenshotPath(testName);
+
+      await page.screenshot({
+        path: `${screenshotPath}.png`
+      });
+      console.log('Screenshot taken', `${screenshotPath}.png`);
+    }
 
     async function elementScreenshotAsync(selector: string, testName: String) {
       console.log(`Selecting element for  ${selector}...`);
-      console.log(`testName  ${testName}...`);
       const element = await page.$(`${selector}`);
-      // await element.screenshot({ path: `${path}\\${ssNamePrefix^^${testName}^^${'browserType'}.png` });
-      await element.screenshot({ path: `${path}\\${ssNamePrefix}^^${testName}^^${browserName}.png` });
-      console.log('element screenshot taken: ', `${path}\\${ssNamePrefix}#${testName}#${browserName}.png`);
+      let screenshotPath = getScreenshotPath(testName);
+
+      await element.screenshot({
+        path: `${screenshotPath}.png`
+      });
+      console.log('Screenshot taken', `${screenshotPath}.png`);
     }
 
     async function hoverAsync(selector: string) {
@@ -115,15 +110,29 @@ const exposePlaywright = async (page: Page, path: String, ssNamePrefix: String, 
 
     async function waitForNotFoundAsync(selector: string) {
       console.log(`Waiting for element for  ${selector}... to detach`);
-      //await page.waitForSelector(`${selector}`, 'detached');
+      await page.waitForSelector(`${selector}`, {state: 'detached'});
     }
 
-    async function doneAsync(shouldCloseWhenDone: string) {
+    async function doneAsync() {
       console.log(`StoryRunner done`);
-      if (shouldCloseWhenDone) {
-        console.log(`Closing the page`);
-        await page.close();
+      console.log(`Closing the page and the browser`);
+      await page.close();
+      console.log(`Page is closed`);
+    }
+  
+    function getScreenshotPath(testName: String){
+      ssNamePrefix = ssNamePrefix.replace(/#/g, "^^").replace(/:/g, "-");
+      testName = testName.replace(/#/g, "^^").replace(/:/g, "-");
+      let screenshotPath = `${path}\\${ssNamePrefix}^^${testName}^^${browserName}`;
+
+      //INFO: Append file prefix if screenshot with same name exist.
+      if(fs.existsSync(screenshotPath + ".png")){
+        console.log("FILE EXISTS");
+        screenshotPath = screenshotPath + '_' +(++fileSuffix);
       }
+
+      console.log(`screenshotPath ${screenshotPath}`);
+      return screenshotPath;
     }
 
     resolve();

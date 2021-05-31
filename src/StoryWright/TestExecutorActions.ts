@@ -1,6 +1,6 @@
 const TestExecutorWindow = (window as unknown) as {
-  makeScreenshot: (testName: string, screenshotsPath: string) => Promise<void>;
-  done: (closeWindow: boolean) => Promise<void>;
+  makeScreenshot: (testName: string) => Promise<void>;
+  done: () => Promise<void>;
   hover: (selector: string) => Promise<void>;
   click: (selector: string) => Promise<void>;
   wait: (selector: string) => Promise<void>;
@@ -9,7 +9,8 @@ const TestExecutorWindow = (window as unknown) as {
   moveTo: (selector: string) => Promise<void>;
   setElementText: (selector: string, text: string) => Promise<void>;
   pressKey: (selector: string, key: string) => Promise<void>;
-  mouseDown: (selector: string, key: string) => Promise<void>;
+  mouseDown: (selector: string) => Promise<void>;
+  mouseUp: () => Promise<void>;
   executeScript: (script: string) => Promise<void>;
   focus: (script: string) => Promise<void>;
 };
@@ -21,17 +22,20 @@ export default {
   executeScript: async (script: string, callback: () => void): Promise<any> => {
     await TestExecutorWindow.executeScript(script).then(callback);
   },
-  mouseDown: async (selector: string, key: string, callback: () => void): Promise<any> => {
-    await TestExecutorWindow.pressKey(selector, key).then(callback);
+  mouseDown: async (selector: string, callback: () => void): Promise<any> => {
+    await TestExecutorWindow.mouseDown(selector).then(callback);
+  },
+  mouseUp: async (callback: () => void): Promise<any> => {
+    await TestExecutorWindow.mouseUp().then(callback);
   },
   pressKey: async (selector: string, key: string, callback: () => void): Promise<any> => {
     await TestExecutorWindow.pressKey(selector, key).then(callback);
   },
-  makeScreenshot: async (testName: string, screenshotsPath: string, callback: () => void): Promise<any> => {
-    await TestExecutorWindow.makeScreenshot(testName, screenshotsPath).then(callback);
+  makeScreenshot: async (testName: string, callback: () => void): Promise<any> => {
+    await TestExecutorWindow.makeScreenshot(testName).then(callback);
   },
-  done: async (closeWindow: boolean, callback: () => void) => {
-    await TestExecutorWindow.done(closeWindow).then(callback);
+  done: async (callback: () => void) => {
+    await TestExecutorWindow.done().then(callback);
   },
   hover: async (selector: string, callback: () => void) => {
     await TestExecutorWindow.hover(selector).then(callback);

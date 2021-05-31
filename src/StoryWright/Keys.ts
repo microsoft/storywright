@@ -30,5 +30,5 @@ export const Keys = {
     f10: 'F10',
     f11: 'F11',
     f12: 'F12',
-    command: '\uE03D'
+    command: 'Meta'
   };
