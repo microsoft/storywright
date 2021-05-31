@@ -1,5 +1,5 @@
 import { join } from 'path';
-import * as playwright from 'playwright';
+import { Browser, Page } from 'playwright';
 import { BrowserUtils } from './BrowserUtils';
 import exposePlaywright from './playwrightMethods';
 import { StoryWrightOptions } from './StoryWrightOptions'
@@ -10,8 +10,8 @@ export class StoryWrightProcessor {
       const browsers: string[] = options.browsers;
       for (const browserName of browsers) {
         console.log(browserName);
-        const browser = await BrowserUtils.getBrowserInstance(browserName, options.headless);
-        const page = await browser.newPage();
+        const browser: Browser = await BrowserUtils.getBrowserInstance(browserName, options.headless);
+        const page: Page = await browser.newPage();
         await page.goto(join(options.url, 'iframe.html'));
         const stories: object[] = await page.evaluate(
           '(__STORYBOOK_CLIENT_API__?.raw() || []).map(e => ({id: e.id, kind: e.kind, name: e.name}))'
