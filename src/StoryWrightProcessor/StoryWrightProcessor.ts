@@ -34,7 +34,7 @@ export class StoryWrightProcessor {
           await Promise.all(
             itemsForBatch.map(async (story: object, index: number) => {
               const id: string = story['id'];
-              const ssNamePrefix = `${story['kind']}#${story['name']}`;
+              const ssNamePrefix = `${story['kind']}^^${story['name']}`;
               const logPrefix = `story:${index + 1}/${stories.length}`;
               if (
                 !id.includes('DocumentTitle'.toLowerCase())
