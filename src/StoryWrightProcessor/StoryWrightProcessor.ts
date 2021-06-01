@@ -55,7 +55,7 @@ export class StoryWrightProcessor {
                 // Wait for close event to be fired from steps. Default timeout is 30 seconds.
                 await page.waitForEvent('close');
               } catch (err) {
-                console.log(`**ERROR** for story ${ssNamePrefix} ${storyIndex}/${stories.length} ${err}`);
+                console.log(`**ERROR** for story ${ssNamePrefix} ${story['id']} ${storyIndex}/${stories.length} ${err}`);
               }
               finally {
                 if (page != null && !page.isClosed()) {
