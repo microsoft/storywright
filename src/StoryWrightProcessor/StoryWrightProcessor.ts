@@ -13,6 +13,8 @@ export class StoryWrightProcessor {
    * @param options Storywright processing options
    */
   public static async process(options: StoryWrightOptions) {
+    let startTime: Date = new Date();
+    console.log("StoryWright processor started @ ", startTime.toTimeString());
 
     const browsers: string[] = options.browsers;
     for (const browserName of browsers) {
@@ -77,6 +79,9 @@ export class StoryWrightProcessor {
         if (browser != null && browser.isConnected) {
           browser.close();
         }
+        let endTime: Date = new Date();
+        console.log("StoryWright took ", (endTime.getSeconds() - startTime.getSeconds()), 'secs to complete.');
+        console.log("StoryWright processor completed @ ", endTime.toTimeString());
       }
     }
   }
