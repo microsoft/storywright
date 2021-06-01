@@ -13,11 +13,13 @@ export class StoryWrightProcessor {
    * @param options Storywright processing options
    */
   public static async process(options: StoryWrightOptions) {
-    try {
-      const browsers: string[] = options.browsers;
-      for (const browserName of browsers) {
-        console.log(browserName);
-        const browser: Browser = await BrowserUtils.getBrowserInstance(browserName, options.headless);
+
+    const browsers: string[] = options.browsers;
+    for (const browserName of browsers) {
+      let browser: Browser;
+      try {
+        console.log(`Starting browser test for ${browserName}`);
+        browser = await BrowserUtils.getBrowserInstance(browserName, options.headless);
         const context = await browser.newContext();
         const page: Page = await context.newPage();
 
@@ -27,57 +29,55 @@ export class StoryWrightProcessor {
         );
         await page.close();
         console.log(`${stories.length} stories found`);
-        let screenshotIndex = 0;
+        let storyIndex = 0;
         let position = 0;
         while (position < stories.length) {
+          // Execute stories in batches concurrently in tabs.
           const itemsForBatch = stories.slice(position, position + options.concurrency);
           await Promise.all(
-            itemsForBatch.map(async (story: object, index: number) => {
+            itemsForBatch.map(async (story: object) => {
               const id: string = story['id'];
+              // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story['kind']}^^${story['name']}`;
-              const logPrefix = `story:${index + 1}/${stories.length}`;
-              if (
-                !id.includes('DocumentTitle'.toLowerCase())
-                // && !id.includes('ContextMenuCompoundButton'.toLowerCase())
-                // && !id.includes('Floatie'.toLowerCase())
-                // && !id.includes('ChartEditTitleDialog'.toLowerCase())
-                // && !id.includes('ChartEditDataDialog'.toLowerCase())
-              ) {
-                // console.log(`header encountered. Returning: ${id}`);
-                return;
-              }
+              let page: Page;
               try {
-                console.log('async');
-                const page = await context.newPage();
+                page = await context.newPage();
+                // TODO : Move these values in config.
+                // TODO : Expose a method in Steps to set viewport size.
                 await page.setViewportSize({
                   width: 1920,
                   height: 964,
                 });
                 await new PlayWrightExecutor(page, options.screenShotDestPath, ssNamePrefix, browserName).exposeFunctions();
-
-                console.log('Rendering story: ');
                 await page.goto(join(options.url, `iframe.html?id=${id}`));
-                console.log(`${Date.now()}  ${new Date().toUTCString()}:: Page closed 1 == ${await page.isClosed()}`);
-                screenshotIndex++;
-                console.log(`${logPrefix} screenshot:${screenshotIndex}/${stories.length}  ${id}`);
+                console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
+
+                // Wait for close event to be fired from steps. Default timeout is 30 seconds.
                 await page.waitForEvent('close');
-                console.log(`${Date.now()} ${new Date().toUTCString()}:: Page closed 2 == ${await page.isClosed()}`);
               } catch (err) {
-                console.log(`${logPrefix} **ERROR** ${err}`);
+                console.log(`**ERROR** for story ${ssNamePrefix} ${storyIndex}/${stories.length} ${err}`);
+              }
+              finally {
+                if (page != null && !page.isClosed()) {
+                  page.close();
+                }
               }
             })
           ).catch(reason => {
-            console.log(reason);
+            console.log(`**ERROR** ${reason}`);
           });
           position += options.concurrency;
         }
       }
-    }
-    catch (err) {
-      console.log(`** ERROR ** ${err}`);
-    }
-    finally {
-      console.log('Closing midgard-stories process');
+      catch (err) {
+        console.log(`** ERROR ** ${err}`);
+      }
+      finally {
+        console.log('Closing process !!');
+        if (browser != null && browser.isConnected) {
+          browser.close();
+        }
+      }
     }
   }
 }

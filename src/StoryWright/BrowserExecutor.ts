@@ -2,6 +2,9 @@ import TestExecutorActions from './TestExecutorActions';
 import { Keys } from './Keys';
 import { StepType } from './StepTypes';
 
+/**
+ * Functions exposed in browser context called from React component.
+ */
 export class BrowserExecutor {
     public static async executesteps(steps: any[]) {
         if (steps === null) {
