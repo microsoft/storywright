@@ -47,7 +47,7 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     .example('$0', 'Captures screenshot for all stories using default static storybook path dist/iframe.html')
     .example('$0 -url https://localhost:5555 --browsers chromium', 'Captures screenshot for all stories from given storybook url for chromium browser').argv;
 
-// When https url is passed no modification required. 
+// When http(s) storybook url is passed no modification required. 
 // When file path is provided it needs to be converted to absolute path and file:/// needs to be added to support firefox browser.
 
 const url: string = (args.url.indexOf("http") > -1) ? args.url : 'file:///' + resolve(args.url);
