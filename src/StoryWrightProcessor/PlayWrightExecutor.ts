@@ -26,7 +26,12 @@ export class PlayWrightExecutor {
   }
 
   mouseUpAsync = async () => {
-    await this.page.mouse.up();
+    try{
+      await this.page.mouse.up();
+    }catch (err){
+      console.error("ERROR: mouseUp: ", err.message);
+      throw err;
+    }  
   }
 
   mouseDownAsync = async (selector: string) => {
@@ -42,6 +47,7 @@ export class PlayWrightExecutor {
       await this.page.mouse.down();
     }catch (err){
       console.error("ERROR: mouseDown: ", err.message);
+      throw err;
     }  
   }
 
@@ -50,6 +56,7 @@ export class PlayWrightExecutor {
       await this.page.focus(selector);
     }catch (err){
       console.error("ERROR: focus: ", err.message);
+      throw err;
     }
   }
 
@@ -58,15 +65,17 @@ export class PlayWrightExecutor {
       await this.page.evaluate(script);
     }catch (err){
       console.error("ERROR: executeScript: ", err.message);
+      throw err;
     }
   }
 
   pressKeyAsync = async (selector: string, key: string) => {
-     try{ 
+    try{ 
       await this.page.press(selector, key);
-     }catch (err){
-        console.error("ERROR: pressKey: ", err.message);
-      }
+    }catch (err){
+      console.error("ERROR: pressKey: ", err.message);
+      throw err;
+    }
   }
 
   setElementTextAsync = async (selector: string, text: string) => {
@@ -75,6 +84,7 @@ export class PlayWrightExecutor {
       await element.fill(text);
     }catch (err){
       console.error("ERROR: setElementText: ", err.message);
+      throw err;
     }
   }
 
@@ -87,6 +97,7 @@ export class PlayWrightExecutor {
       console.log("element clicked");
     }catch (err){
       console.error("ERROR: click: ", err.message);
+      throw err;
     }
   }
 
@@ -99,7 +110,7 @@ export class PlayWrightExecutor {
       });
     }catch (err) {
       console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
-      console.info("Continuing execution...");
+      throw err;
     }
   }
 
@@ -133,7 +144,7 @@ export class PlayWrightExecutor {
       });
     }catch (err){
       console.error("ERROR: HOVER: ", err.message);
-      console.info("Continuing execution...");
+      throw err;
     }
     
   }
@@ -143,6 +154,7 @@ export class PlayWrightExecutor {
       await this.page.waitForSelector(`${selector}`);
     }catch (err){
       console.error("ERROR: waitForSelector: ", err.message);
+      throw err;
     }
   }
 
@@ -151,6 +163,7 @@ export class PlayWrightExecutor {
       await this.page.waitForSelector(`${selector}`, { state: 'detached' });
     }catch (err){
       console.error("ERROR: waitForNotFound: ", err.message);
+      throw err;
     }
   }
 
@@ -159,6 +172,7 @@ export class PlayWrightExecutor {
       await this.page.close();
     }catch (err){
       console.error("ERROR: completed steps: ", err.message);
+      throw err;
     }
   }
 
