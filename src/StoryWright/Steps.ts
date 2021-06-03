@@ -10,7 +10,6 @@ export class Steps {
     if (opts && typeof opts.cropTo === 'string') {
       step.type = 'cropScreenshot';
       step.locator = {
-        type: 'css selector',
         value: opts.cropTo
       };
     }
@@ -35,7 +34,6 @@ export class Steps {
     var step = {
       type: 'clickElement',
       locator: {
-        type: 'css selector',
         value: selector
       },
       maxTime: ''
@@ -51,7 +49,6 @@ export class Steps {
     var step = {
       type: 'moveTo',
       locator: {
-        type: 'css selector',
         value: selector
       }
     };
@@ -66,7 +63,6 @@ export class Steps {
     };
     if (selector) {
       step.locator = {
-        type: 'css selector',
         value: selector
       };
     }
@@ -81,7 +77,6 @@ export class Steps {
     };
     if (selector) {
       step.locator = {
-        type: 'css selector',
         value: selector
       };
     }
@@ -93,7 +88,6 @@ export class Steps {
     var step = {
       type: 'setElementText',
       locator: {
-        type: 'css selector',
         value: selector
       },
       text: text,
@@ -110,7 +104,6 @@ export class Steps {
     var step = {
       type: 'clearElementText',
       locator: {
-        type: 'css selector',
         value: selector
       }
     };
@@ -122,7 +115,6 @@ export class Steps {
     var step = {
       type: 'sendKeys',
       locator: {
-        type: 'css selector',
         value: selector
       },
       keys: keys
@@ -152,7 +144,6 @@ export class Steps {
     var step = {
       type: 'ignoreElements',
       locator: {
-        type: 'css selector',
         value: selector
       }
     };
@@ -179,7 +170,6 @@ export class Steps {
       step = {
         type: 'waitForElementPresent',
         locator: {
-          type: 'css selector',
           value: msOrSelector
         }
       };
@@ -195,7 +185,6 @@ export class Steps {
     var step = {
       type: 'waitForElementNotPresent',
       locator: {
-        type: 'css selector',
         value: selector
       },
       maxTime: ''
@@ -203,24 +192,6 @@ export class Steps {
     if (options && options.maxTime) {
       step.maxTime = options.maxTime;
     }
-    this.steps.push(step);
-    return this;
-  }
-
-  public rtl() {
-    var step = {
-      type: 'executeScript',
-      code: 'document.documentElement.dir = "rtl";'
-    };
-    this.steps.push(step);
-    return this;
-  }
-
-  public ltr() {
-    var step = {
-      type: 'executeScript',
-      code: 'document.documentElement.dir = "ltr";'
-    };
     this.steps.push(step);
     return this;
   }

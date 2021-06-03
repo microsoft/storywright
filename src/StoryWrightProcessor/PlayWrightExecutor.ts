@@ -25,17 +25,17 @@ export class PlayWrightExecutor {
     await this.page.exposeFunction('mouseUp', this.mouseUpAsync);
   }
 
-  mouseUpAsync = async () => {
-    try{
+  private mouseUpAsync = async () => {
+    try {
       await this.page.mouse.up();
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: mouseUp: ", err.message);
       throw err;
-    }  
+    }
   }
 
-  mouseDownAsync = async (selector: string) => {
-    try{  
+  private mouseDownAsync = async (selector: string) => {
+    try {
       let element;
       if (selector.charAt(0) === '#') {
         element = await this.page.$(`id=${selector.substring(1, selector.length)}`)
@@ -45,138 +45,138 @@ export class PlayWrightExecutor {
       const box = await element.boundingBox();
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await this.page.mouse.down();
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: mouseDown: ", err.message);
       throw err;
-    }  
+    }
   }
 
-  focusAsync = async (selector: string) => {
-    try{
+  private focusAsync = async (selector: string) => {
+    try {
       await this.page.focus(selector);
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: focus: ", err.message);
       throw err;
     }
   }
 
-  executeScriptAsync = async (script: string) => {
-    try{  
+  private executeScriptAsync = async (script: string) => {
+    try {
       await this.page.evaluate(script);
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: executeScript: ", err.message);
       throw err;
     }
   }
 
-  pressKeyAsync = async (selector: string, key: string) => {
-    try{ 
+  private pressKeyAsync = async (selector: string, key: string) => {
+    try {
       await this.page.press(selector, key);
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: pressKey: ", err.message);
       throw err;
     }
   }
 
-  setElementTextAsync = async (selector: string, text: string) => {
-    try{
+  private setElementTextAsync = async (selector: string, text: string) => {
+    try {
       const element = await this.page.$(`${selector}`);
       await element.fill(text);
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: setElementText: ", err.message);
       throw err;
     }
   }
 
-  clickAsync = async (selector: string) => {
-    try{
+  private clickAsync = async (selector: string) => {
+    try {
       const element = await this.page.$(`${selector}`);
       await element.click({
         force: true
       });
       console.log("element clicked");
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: click: ", err.message);
       throw err;
     }
   }
 
-  makeScreenshotAsync = async (testName: string) => {
-    try{
+  private makeScreenshotAsync = async (testName: string) => {
+    try {
       let screenshotPath = this.getScreenshotPath(testName);
 
       await this.page.screenshot({
         path: `${screenshotPath}.png`
       });
-    }catch (err) {
+    } catch (err) {
       console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
       throw err;
     }
   }
 
-  elementScreenshotAsync = async (selector: string, testName: string) => {
-    try{
+  private elementScreenshotAsync = async (selector: string, testName: string) => {
+    try {
       let element = await this.page.$(`${selector}`);
-      if(await element.isVisible()){
+      if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
 
         await element.screenshot({
           path: `${screenshotPath}.png`
         });
-      }else{
+      } else {
         console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
         await this.makeScreenshotAsync(testName);
       }
-      
-    }catch (err) {
+
+    } catch (err) {
       console.error("ERROR: ELEMENT_SCREENSHOT: ", err.message);
       console.info("Trying full page screenshot");
       await this.makeScreenshotAsync(testName);
     }
-    
+
   }
 
-  hoverAsync = async (selector: string) => {
-    try{
+  private hoverAsync = async (selector: string) => {
+    try {
       const element = await this.page.$(`${selector}`);
       await element.hover({
         force: true
       });
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: HOVER: ", err.message);
       throw err;
     }
-    
+
   }
 
-  waitForSelectorAsync = async (selector: string) => {
-    try{
+  private waitForSelectorAsync = async (selector: string) => {
+    try {
       await this.page.waitForSelector(`${selector}`);
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: waitForSelector: ", err.message);
       throw err;
     }
   }
 
-  waitForNotFoundAsync = async (selector: string) => {
-    try{  
+  private waitForNotFoundAsync = async (selector: string) => {
+    try {
       await this.page.waitForSelector(`${selector}`, { state: 'detached' });
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: waitForNotFound: ", err.message);
       throw err;
     }
   }
 
-  doneAsync = async () => {
-    try{
+  private doneAsync = async () => {
+    try {
       await this.page.close();
-    }catch (err){
+    } catch (err) {
       console.error("ERROR: completed steps: ", err.message);
       throw err;
     }
   }
 
-  public getScreenshotPath(testName: String) {
+  private getScreenshotPath(testName: String) {
     this.ssNamePrefix = this.ssNamePrefix.replace(/:/g, "-");
     testName = testName.replace(/:/g, "-");
     let screenshotPath = `${this.path}\\${this.ssNamePrefix}^^${testName}^^${this.browserName}`;
