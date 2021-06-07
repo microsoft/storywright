@@ -7,8 +7,9 @@ import { StepType } from './StepTypes';
  */
 export class BrowserExecutor {
     public static async executesteps(steps: any[]) {
-        if (steps === null) {
-            console.log("Steps object is null");
+        if (steps === null || steps === undefined || steps.length == 0) {
+            console.log(`Steps object is ${steps}`);
+            await TestExecutorActions.makeScreenshot();
             await TestExecutorActions.done();
             return;
         }

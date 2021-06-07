@@ -1,4 +1,5 @@
-export enum Browser {
+export enum BrowserName {
     Chromium = "chromium",
-    Firefox = "firefox"
+    Firefox = "firefox",
+    Webkit = 'webkit'
 }

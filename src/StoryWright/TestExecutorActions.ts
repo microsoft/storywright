@@ -1,5 +1,5 @@
 const TestExecutorWindow = (window as unknown) as {
-  makeScreenshot: (testName: string) => Promise<void>;
+  makeScreenshot: (testName?: string) => Promise<void>;
   done: () => Promise<void>;
   hover: (selector: string) => Promise<void>;
   click: (selector: string) => Promise<void>;
@@ -31,7 +31,7 @@ export default {
   pressKey: async (selector: string, key: string): Promise<any> => {
     await TestExecutorWindow.pressKey(selector, key);
   },
-  makeScreenshot: async (testName: string): Promise<any> => {
+  makeScreenshot: async (testName?: string): Promise<any> => {
     await TestExecutorWindow.makeScreenshot(testName);
   },
   done: async () => {

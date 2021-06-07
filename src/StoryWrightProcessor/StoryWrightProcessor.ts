@@ -13,8 +13,8 @@ export class StoryWrightProcessor {
    * @param options Storywright processing options
    */
   public static async process(options: StoryWrightOptions) {
-    let startTime: Date = new Date();
-    console.log("StoryWright processor started @ ", startTime.toTimeString());
+    let startTime = Date.now();
+    console.log("StoryWright processor started @ ", new Date());
 
     const browsers: string[] = options.browsers;
     for (const browserName of browsers) {
@@ -61,7 +61,7 @@ export class StoryWrightProcessor {
               }
               finally {
                 if (page != null && !page.isClosed()) {
-                  page.close();
+                  await page.close();
                 }
               }
             })
@@ -76,12 +76,12 @@ export class StoryWrightProcessor {
       }
       finally {
         console.log('Closing process !!');
-        if (browser != null && browser.isConnected) {
-          browser.close();
+        if (browser != null && browser.isConnected()) {
+          await browser.close();
         }
-        let endTime: Date = new Date();
-        console.log("StoryWright took ", (endTime.getSeconds() - startTime.getSeconds()), 'secs to complete.');
-        console.log("StoryWright processor completed @ ", endTime.toTimeString());
+        let endTime = Date.now();
+        console.log("StoryWright took ", Math.round((endTime-startTime)/1000), 'secs to complete.');
+        console.log("StoryWright processor completed @ ", new Date());
       }
     }
   }

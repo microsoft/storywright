@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { Page } from 'playwright';
-
+import {sep} from 'path';
 /**
  * Class containing playwright exposed functions.
  */
@@ -10,22 +10,22 @@ export class PlayWrightExecutor {
   constructor(private page: Page, private path: String, private ssNamePrefix: String, private browserName: string) { }
 
   public async exposeFunctions() {
-    await this.page.exposeFunction('makeScreenshot', this.makeScreenshotAsync);
-    await this.page.exposeFunction('click', this.clickAsync);
-    await this.page.exposeFunction('hover', this.hoverAsync);
-    await this.page.exposeFunction('wait', this.waitForSelectorAsync);
-    await this.page.exposeFunction('waitForNotFound', this.waitForNotFoundAsync);
-    await this.page.exposeFunction('elementScreenshot', this.elementScreenshotAsync);
-    await this.page.exposeFunction('done', this.doneAsync);
-    await this.page.exposeFunction('setElementText', this.setElementTextAsync);
-    await this.page.exposeFunction('pressKey', this.pressKeyAsync);
-    await this.page.exposeFunction('executeScript', this.executeScriptAsync);
-    await this.page.exposeFunction('focus', this.focusAsync);
-    await this.page.exposeFunction('mouseDown', this.mouseDownAsync);
-    await this.page.exposeFunction('mouseUp', this.mouseUpAsync);
+    await this.page.exposeFunction('makeScreenshot', this.makeScreenshot);
+    await this.page.exposeFunction('click', this.click);
+    await this.page.exposeFunction('hover', this.hover);
+    await this.page.exposeFunction('wait', this.waitForSelector);
+    await this.page.exposeFunction('waitForNotFound', this.waitForNotFound);
+    await this.page.exposeFunction('elementScreenshot', this.elementScreenshot);
+    await this.page.exposeFunction('done', this.done);
+    await this.page.exposeFunction('setElementText', this.setElementText);
+    await this.page.exposeFunction('pressKey', this.pressKey);
+    await this.page.exposeFunction('executeScript', this.executeScript);
+    await this.page.exposeFunction('focus', this.focus);
+    await this.page.exposeFunction('mouseDown', this.mouseDown);
+    await this.page.exposeFunction('mouseUp', this.mouseUp);
   }
 
-  private mouseUpAsync = async () => {
+  private mouseUp = async () => {
     try {
       await this.page.mouse.up();
     } catch (err) {
@@ -34,13 +34,13 @@ export class PlayWrightExecutor {
     }
   }
 
-  private mouseDownAsync = async (selector: string) => {
+  private mouseDown = async (selector: string) => {
     try {
       let element;
       if (selector.charAt(0) === '#') {
         element = await this.page.$(`id=${selector.substring(1, selector.length)}`)
       } else {
-        element = await this.page.$(`${selector}`);
+        element = await this.page.$(selector);
       }
       const box = await element.boundingBox();
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -51,7 +51,7 @@ export class PlayWrightExecutor {
     }
   }
 
-  private focusAsync = async (selector: string) => {
+  private focus = async (selector: string) => {
     try {
       await this.page.focus(selector);
     } catch (err) {
@@ -60,7 +60,7 @@ export class PlayWrightExecutor {
     }
   }
 
-  private executeScriptAsync = async (script: string) => {
+  private executeScript = async (script: string) => {
     try {
       await this.page.evaluate(script);
     } catch (err) {
@@ -69,7 +69,7 @@ export class PlayWrightExecutor {
     }
   }
 
-  private pressKeyAsync = async (selector: string, key: string) => {
+  private pressKey = async (selector: string, key: string) => {
     try {
       await this.page.press(selector, key);
     } catch (err) {
@@ -78,9 +78,9 @@ export class PlayWrightExecutor {
     }
   }
 
-  private setElementTextAsync = async (selector: string, text: string) => {
+  private setElementText = async (selector: string, text: string) => {
     try {
-      const element = await this.page.$(`${selector}`);
+      const element = await this.page.$(selector);
       await element.fill(text);
     } catch (err) {
       console.error("ERROR: setElementText: ", err.message);
@@ -88,9 +88,9 @@ export class PlayWrightExecutor {
     }
   }
 
-  private clickAsync = async (selector: string) => {
+  private click = async (selector: string) => {
     try {
-      const element = await this.page.$(`${selector}`);
+      const element = await this.page.$(selector);
       await element.click({
         force: true
       });
@@ -101,7 +101,7 @@ export class PlayWrightExecutor {
     }
   }
 
-  private makeScreenshotAsync = async (testName: string) => {
+  private makeScreenshot = async (testName?: string) => {
     try {
       let screenshotPath = this.getScreenshotPath(testName);
 
@@ -114,9 +114,9 @@ export class PlayWrightExecutor {
     }
   }
 
-  private elementScreenshotAsync = async (selector: string, testName: string) => {
+  private elementScreenshot = async (selector: string, testName: string) => {
     try {
-      let element = await this.page.$(`${selector}`);
+      let element = await this.page.$(selector);
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
 
@@ -125,20 +125,20 @@ export class PlayWrightExecutor {
         });
       } else {
         console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
-        await this.makeScreenshotAsync(testName);
+        await this.makeScreenshot(testName);
       }
 
     } catch (err) {
       console.error("ERROR: ELEMENT_SCREENSHOT: ", err.message);
       console.info("Trying full page screenshot");
-      await this.makeScreenshotAsync(testName);
+      await this.makeScreenshot(testName);
     }
 
   }
 
-  private hoverAsync = async (selector: string) => {
+  private hover = async (selector: string) => {
     try {
-      const element = await this.page.$(`${selector}`);
+      const element = await this.page.$(selector);
       await element.hover({
         force: true
       });
@@ -149,25 +149,25 @@ export class PlayWrightExecutor {
 
   }
 
-  private waitForSelectorAsync = async (selector: string) => {
+  private waitForSelector = async (selector: string) => {
     try {
-      await this.page.waitForSelector(`${selector}`);
+      await this.page.waitForSelector(selector);
     } catch (err) {
       console.error("ERROR: waitForSelector: ", err.message);
       throw err;
     }
   }
 
-  private waitForNotFoundAsync = async (selector: string) => {
+  private waitForNotFound = async (selector: string) => {
     try {
-      await this.page.waitForSelector(`${selector}`, { state: 'detached' });
+      await this.page.waitForSelector(selector, { state: 'detached' });
     } catch (err) {
       console.error("ERROR: waitForNotFound: ", err.message);
       throw err;
     }
   }
 
-  private doneAsync = async () => {
+  private done = async () => {
     try {
       await this.page.close();
     } catch (err) {
@@ -176,10 +176,16 @@ export class PlayWrightExecutor {
     }
   }
 
-  private getScreenshotPath(testName: String) {
+  private getScreenshotPath(testName?: String) {
     this.ssNamePrefix = this.ssNamePrefix.replace(/:/g, "-");
-    testName = testName.replace(/:/g, "-");
-    let screenshotPath = `${this.path}\\${this.ssNamePrefix}^^${testName}^^${this.browserName}`;
+    let screenshotPath;
+
+    if(testName){
+      testName = testName.replace(/:/g, "-");
+      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}^^${testName}^^${this.browserName}`;
+    }else{
+      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}^^${this.browserName}`;
+    }
 
     //INFO: Append file prefix if screenshot with same name exist.
     if (fs.existsSync(screenshotPath + ".png")) {

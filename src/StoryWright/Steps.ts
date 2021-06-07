@@ -127,15 +127,11 @@ export class Steps {
     return this.keys(selector, '');
   }
 
-  public executeScript(code, isAsync?) {
+  public executeScript(code) {
     var step = {
       type: 'executeScript',
-      code: code,
-      isAsync: false
+      code: code
     };
-    if (isAsync === true) {
-      step.isAsync = true;
-    }
     this.steps.push(step);
     return this;
   }

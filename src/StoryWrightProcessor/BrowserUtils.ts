@@ -1,5 +1,5 @@
 import * as playwright from 'playwright';
-import { Browser } from './Constants';
+import { BrowserName } from './Constants';
 export class BrowserUtils {
     /**
      * Returns browser instance for given browser name
@@ -9,10 +9,12 @@ export class BrowserUtils {
      */
     public static async getBrowserInstance(browserName: string, headless: boolean) {
         switch (browserName) {
-            case Browser.Chromium:
+            case BrowserName.Chromium:
                 return await playwright.chromium.launch({ headless: headless });
-            case Browser.Firefox:
+            case BrowserName.Firefox:
                 return await playwright.firefox.launch({ headless: headless });
+            case BrowserName.Webkit:
+                return await playwright.webkit.launch({ headless: headless });
         }
     }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as argv from 'yargs';
-import { Browser } from './StoryWrightProcessor/Constants';
+import { BrowserName } from './StoryWrightProcessor/Constants';
 import { StoryWrightOptions } from './StoryWrightProcessor/StoryWrightOptions';
 import { StoryWrightProcessor } from './StoryWrightProcessor/StoryWrightProcessor';
 import { resolve } from 'path';
@@ -21,14 +21,14 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     })
     .option('browsers', {
         alias: 'browsers',
-        default: [Browser.Chromium, Browser.Firefox],
+        default: [BrowserName.Chromium, BrowserName.Firefox],
         describe: 'Comma seperated list of browsers to support',
         nargs: 1,
         type: "array",
         coerce: array => {
             return array.flatMap(v => v.split(','))
         },
-        choices: [Browser.Chromium, Browser.Firefox]
+        choices: [BrowserName.Chromium, BrowserName.Firefox, BrowserName.Webkit]
     })
     .option('headless', {
         alias: 'headless',
