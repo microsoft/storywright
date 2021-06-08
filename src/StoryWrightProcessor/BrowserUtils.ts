@@ -10,11 +10,11 @@ export class BrowserUtils {
     public static async getBrowserInstance(browserName: string, headless: boolean) {
         switch (browserName) {
             case BrowserName.Chromium:
-                return await playwright.chromium.launch({ headless: headless });
+                return await playwright.chromium.launch({ headless });
             case BrowserName.Firefox:
-                return await playwright.firefox.launch({ headless: headless });
+                return await playwright.firefox.launch({ headless });
             case BrowserName.Webkit:
-                return await playwright.webkit.launch({ headless: headless });
+                return await playwright.webkit.launch({ headless });
         }
     }
 }

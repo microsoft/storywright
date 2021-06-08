@@ -1,7 +1,11 @@
+type optionsObj = {
+  [key: string]: any
+}
+
 export class Steps {
   steps = [];
 
-  public snapshot(name: string, opts?: any) {
+  public snapshot(name: string, opts?: optionsObj) {
     var step = {
       type: 'saveScreenshot',
       name: name,
@@ -30,7 +34,7 @@ export class Steps {
     return this.steps;
   }
 
-  public click(selector, options?) {
+  public click(selector: string, options?: optionsObj) {
     var step = {
       type: 'clickElement',
       locator: {
@@ -45,7 +49,7 @@ export class Steps {
     return this;
   }
 
-  public hover(selector) {
+  public hover(selector: string) {
     var step = {
       type: 'moveTo',
       locator: {
@@ -56,7 +60,7 @@ export class Steps {
     return this;
   }
 
-  public mouseDown(selector) {
+  public mouseDown(selector: string) {
     var step = {
       type: 'clickAndHoldElement',
       locator: {}
@@ -70,7 +74,7 @@ export class Steps {
     return this;
   }
 
-  public mouseUp(selector) {
+  public mouseUp(selector: string) {
     var step = {
       type: 'releaseElement',
       locator: {}
@@ -84,7 +88,7 @@ export class Steps {
     return this;
   }
 
-  public setValue(selector, text, options?) {
+  public setValue(selector: string, text: string, options?: optionsObj) {
     var step = {
       type: 'setElementText',
       locator: {
@@ -100,7 +104,7 @@ export class Steps {
     return this;
   }
 
-  public clearValue(selector) {
+  public clearValue(selector: string) {
     var step = {
       type: 'clearElementText',
       locator: {
@@ -111,7 +115,7 @@ export class Steps {
     return this;
   }
 
-  public keys(selector, keys) {
+  public keys(selector: string, keys: string) {
     var step = {
       type: 'sendKeys',
       locator: {
@@ -123,11 +127,11 @@ export class Steps {
     return this;
   }
 
-  public focus(selector) {
+  public focus(selector: string) {
     return this.keys(selector, '');
   }
 
-  public executeScript(code) {
+  public executeScript(code: string) {
     var step = {
       type: 'executeScript',
       code: code
@@ -136,26 +140,7 @@ export class Steps {
     return this;
   }
 
-  public ignore(selector) {
-    var step = {
-      type: 'ignoreElements',
-      locator: {
-        value: selector
-      }
-    };
-    this.steps.push(step);
-    return this;
-  }
-
-  public clearIgnores() {
-    var step = {
-      type: 'clearIgnores'
-    };
-    this.steps.push(step);
-    return this;
-  }
-
-  public wait(msOrSelector, options?) {
+  public wait(msOrSelector, options?: optionsObj) {
     var step;
     if (typeof msOrSelector === 'number') {
       step = {
@@ -177,7 +162,7 @@ export class Steps {
     return this;
   }
 
-  public waitForNotFound(selector, options?) {
+  public waitForNotFound(selector: string, options?: optionsObj) {
     var step = {
       type: 'waitForElementNotPresent',
       locator: {
@@ -192,7 +177,7 @@ export class Steps {
     return this;
   }
 
-  public cssAnimations(isEnabled) {
+  public cssAnimations(isEnabled: boolean) {
     var step = {
       type: 'cssAnimations',
       isEnabled: isEnabled

@@ -14,7 +14,7 @@ export class StoryWrightProcessor {
    */
   public static async process(options: StoryWrightOptions) {
     let startTime = Date.now();
-    console.log("StoryWright processor started @ ", new Date());
+    console.log('StoryWright processor started @ ', new Date());
 
     const browsers: string[] = options.browsers;
     for (const browserName of browsers) {
@@ -50,6 +50,11 @@ export class StoryWrightProcessor {
                   width: 1920,
                   height: 964,
                 });
+
+                //TODO: Take screenshots when user doesn't want steps to be executed.
+                // if(options.screenshotwithoutsteps){
+                //   console.log('In IF');
+                // }
                 await new PlayWrightExecutor(page, options.screenShotDestPath, ssNamePrefix, browserName).exposeFunctions();
                 await page.goto(join(options.url, `iframe.html?id=${id}`));
                 console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
@@ -80,8 +85,8 @@ export class StoryWrightProcessor {
           await browser.close();
         }
         let endTime = Date.now();
-        console.log("StoryWright took ", Math.round((endTime-startTime)/1000), 'secs to complete.');
-        console.log("StoryWright processor completed @ ", new Date());
+        console.log('StoryWright took ', Math.round((endTime-startTime)/1000), 'secs to complete.');
+        console.log('StoryWright processor completed @ ', new Date());
       }
     }
   }
