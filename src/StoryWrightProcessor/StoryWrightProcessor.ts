@@ -3,6 +3,7 @@ import { Browser, Page } from 'playwright';
 import { BrowserUtils } from './BrowserUtils';
 import { PlayWrightExecutor } from './PlayWrightExecutor';
 import { StoryWrightOptions } from './StoryWrightOptions'
+import {sep} from 'path';
 
 /**
  * Class containing StoryWright operations
@@ -40,7 +41,7 @@ export class StoryWrightProcessor {
             itemsForBatch.map(async (story: object) => {
               const id: string = story['id'];
               // Set story category and name as prefix for screenshot name.
-              const ssNamePrefix = `${story['kind']}^^${story['name']}`;
+              const ssNamePrefix = `${story['kind']}.${story['name']}`;
               let page: Page;
               try {
                 page = await context.newPage();
@@ -52,15 +53,19 @@ export class StoryWrightProcessor {
                 });
 
                 //TODO: Take screenshots when user doesn't want steps to be executed.
-                // if(options.screenshotwithoutsteps){
-                //   console.log('In IF');
-                // }
-                await new PlayWrightExecutor(page, options.screenShotDestPath, ssNamePrefix, browserName).exposeFunctions();
-                await page.goto(join(options.url, `iframe.html?id=${id}`));
-                console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
-
-                // Wait for close event to be fired from steps. Default timeout is 30 seconds.
-                await page.waitForEvent('close');
+                if(options.skipSteps){
+                  await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
+                  await page.screenshot({path: options.screenShotDestPath + sep + ssNamePrefix + '.png'});
+                }else{
+                  await new PlayWrightExecutor(page, options.screenShotDestPath, ssNamePrefix, browserName).exposeFunctions();
+                  await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
+                  
+                  // Wait for close event to be fired from steps. Default timeout is 30 seconds.
+                  await page.waitForEvent('close');
+                }
+                
               } catch (err) {
                 console.log(`**ERROR** for story ${ssNamePrefix} ${story['id']} ${storyIndex}/${stories.length} ${err}`);
               }

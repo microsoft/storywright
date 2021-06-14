@@ -7,4 +7,5 @@ export interface StoryWrightOptions {
   browsers: Array<string>;
   headless: boolean;
   concurrency: number;
+  skipSteps: boolean;
 }

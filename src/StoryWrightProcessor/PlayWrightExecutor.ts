@@ -182,9 +182,9 @@ export class PlayWrightExecutor {
 
     if(testName){
       testName = testName.replace(/:/g, '-');
-      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}^^${testName}^^${this.browserName}`;
+      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`;
     }else{
-      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}^^${this.browserName}`;
+      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`;
     }
 
     //INFO: Append file prefix if screenshot with same name exist.

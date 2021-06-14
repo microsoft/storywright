@@ -8,7 +8,7 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
     .option('url', {
         alias: 'storybookurl',
         default: 'dist',
-        describe: 'Url to story book. Can be relative path to folder like dist or server url http://localhost:5555',
+        describe: 'Url to storybook. Can be relative path to folder like dist or server url http://localhost:5555',
         nargs: 1,
         type: 'string'
     })
@@ -44,8 +44,8 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
         nargs: 1,
         type: 'number'
     })
-    .option('screenshotwithoutsteps ', {
-        alias: 'screenshotwithoutsteps ',
+    .option('skipSteps', {
+        alias: 'skipSteps',
         default: false,
         describe: 'Take Screenshot of all Storybook stories with/without wrapped component',
         nargs: 1,
@@ -65,6 +65,7 @@ console.log(`Screenshot destination path = ${args.destpath}`);
 console.log(`Browsers = ${args.browsers}`);
 console.log(`Headless = ${args.headless}`);
 console.log(`Concurrency = ${args.concurrency}`);
+console.log(`SkipSteps = ${args.skipSteps}`);
 console.log(`================ Starting story right execution =================`);
 
 const storyWrightOptions: StoryWrightOptions = {
@@ -72,7 +73,8 @@ const storyWrightOptions: StoryWrightOptions = {
     screenShotDestPath: args.destpath,
     browsers: args.browsers,
     headless: args.headless,
-    concurrency: args.concurrency
+    concurrency: args.concurrency,
+    skipSteps: args.skipSteps,
 };
 
 StoryWrightProcessor.process(storyWrightOptions);
