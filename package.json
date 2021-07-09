@@ -1,0 +1,30 @@
+{
+  "name": "storywright",
+  "description": "Storybook setup.",
+  "license": "MIT",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "bin": {
+    "storywright": "./bin/storywright.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc -w --preserveWatchOutput"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@types/react": "^17.0.8",
+    "playwright": "^1.11.1",
+    "react": "^17.0.2",
+    "yargs": "^16.2.0"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "@types/node": "^15.6.1",
+    "typescript": "^4.1.2",
+    "@types/yargs": "^15.0.13"
+  },
+  "sideEffects": false
+}

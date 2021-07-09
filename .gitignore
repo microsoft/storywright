@@ -1,0 +1,12 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+lib/
+
+# Dependency directories
+node_modules/
+
+tsconfig.tsbuildinfo
