@@ -186,3 +186,38 @@ export class Steps {
     return this;
   }
 }
+
+export interface Locator {
+  type: 'css selector';
+  value: string;
+}
+
+export type StepType = 'url' |
+  'saveScreenshot' |
+  'cropScreenshot' |
+  'clickElement' |
+  'moveTo' |
+  'clickAndHoldElement' |
+  'releaseElement' |
+  'setElementText' |
+  'sendKeys' |
+  'executeScript' |
+  'ignoreElements' |
+  'pause' |
+  'waitForElementPresent' |
+  'waitForElementNotPresent' |
+  'cssAnimations';
+
+export interface Step {
+  type: StepType;
+  locator?: Locator;
+  url?: string;
+  name?: string;
+  text?: string;
+  isPassword?: boolean;
+  keys?: string;
+  code?: string;
+  isAsync?: boolean;
+  waitTime?: number;
+  isEnabled?: boolean;
+}
