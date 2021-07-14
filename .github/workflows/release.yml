@@ -30,6 +30,7 @@ jobs:
       - run: npm install
       
       - run: npm run build
+      
       - run: npm config set //registry.npmjs.org/:_authToken $NPM_AUTHTOKEN
         name: Set registry
         env:
