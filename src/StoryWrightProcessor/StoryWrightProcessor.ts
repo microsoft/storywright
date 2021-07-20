@@ -30,10 +30,15 @@ export class StoryWrightProcessor {
         let stories: object[] = await page.evaluate(
           '(__STORYBOOK_CLIENT_API__?.raw() || []).map(e => ({id: e.id, kind: e.kind, name: e.name}))'
         );
-        if (options.totalPartitions >= 1) {
+        if (options.totalPartitions > 1) {
+          console.log(
+            "Starting partitioning with", options.totalPartitions, "total partitions and partition number to select", options.partition
+          );
+          console.log("Total Stories length", stories.length);
           const totalStories = stories.length;
           const storiesInEachPartition = Math.ceil(totalStories/options.totalPartitions);
           const startingIndex = (options.partition - 1)  * storiesInEachPartition;
+          console.log("Partition indexes", startingIndex, startingIndex + storiesInEachPartition);
           stories = stories.slice(startingIndex, startingIndex + storiesInEachPartition);
         }
         await page.close();
