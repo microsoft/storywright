@@ -37,6 +37,16 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
         nargs: 1,
         type: 'boolean'
     })
+    .option('partition', {
+        default: 1,
+        describe: "Partition number to run, used in conjunction with totalPartitions parameter to run specific partition of the stories",
+        type: "number"
+    })
+    .option('totalPartitions', {
+        default: 1,
+        describe: "Number of partitions, used in conjunction with partition parameter to run specific partition of the stories",
+        type: "number"
+    })
     .option('concurrency', {
         alias: 'concurrency',
         default: 8,
@@ -75,6 +85,8 @@ const storyWrightOptions: StoryWrightOptions = {
     headless: args.headless,
     concurrency: args.concurrency,
     skipSteps: args.skipSteps,
+    partition: args.partition,
+    totalPartitions: args.totalPartitions
 };
 
 StoryWrightProcessor.process(storyWrightOptions);
