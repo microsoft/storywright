@@ -1,4 +1,4 @@
-const TestExecutorWindow = (window as unknown) as {
+const TestExecutorWindow = window as unknown as {
   makeScreenshot: (testName?: string) => Promise<void>;
   done: () => Promise<void>;
   hover: (selector: string) => Promise<void>;
