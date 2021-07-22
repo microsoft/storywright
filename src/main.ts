@@ -37,14 +37,14 @@ const args = argv.usage('Usage: $0 [options]').help('h').alias('h', 'help')
         nargs: 1,
         type: 'boolean'
     })
-    .option('partition', {
+    .option('partitionIndex', {
         default: 1,
-        describe: "Partition number to run, used in conjunction with totalPartitions parameter to run specific partition of the stories",
+        describe: "Partition index (1 to totalPartitions) to run, used in conjunction with totalPartitions parameter to run specific partition of the stories. This can be used to distribute workloads across different machines, threads or workers.",
         type: "number"
     })
     .option('totalPartitions', {
         default: 1,
-        describe: "Number of partitions, used in conjunction with partition parameter to run specific partition of the stories",
+        describe: "Number of partitions, used in conjunction with partitionIndex parameter to run specific partition of the stories. This can be used to distribute workloads across different machines, threads or workers.",
         type: "number"
     })
     .option('concurrency', {
@@ -85,7 +85,7 @@ const storyWrightOptions: StoryWrightOptions = {
     headless: args.headless,
     concurrency: args.concurrency,
     skipSteps: args.skipSteps,
-    partition: args.partition,
+    partitionIndex: args.partitionIndex,
     totalPartitions: args.totalPartitions
 };
 

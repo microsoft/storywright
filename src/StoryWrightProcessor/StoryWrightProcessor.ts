@@ -3,6 +3,7 @@ import { Browser, Page } from 'playwright';
 import { BrowserUtils } from './BrowserUtils';
 import { PlayWrightExecutor } from './PlayWrightExecutor';
 import { StoryWrightOptions } from './StoryWrightOptions'
+import { partitionArray } from '../utils';
 import {sep} from 'path';
 
 /**
@@ -32,14 +33,12 @@ export class StoryWrightProcessor {
         );
         if (options.totalPartitions > 1) {
           console.log(
-            "Starting partitioning with", options.totalPartitions, "total partitions and partition number to select", options.partition
+            "Starting partitioning with ",
+            "Total partitions -", options.totalPartitions, "&",
+            "Partition index to select -", options.partitionIndex, "&",
+            "Total Stories length -", stories.length
           );
-          console.log("Total Stories length", stories.length);
-          const totalStories = stories.length;
-          const storiesInEachPartition = Math.ceil(totalStories/options.totalPartitions);
-          const startingIndex = (options.partition - 1)  * storiesInEachPartition;
-          console.log("Partition indexes", startingIndex, startingIndex + storiesInEachPartition);
-          stories = stories.slice(startingIndex, startingIndex + storiesInEachPartition);
+          stories = partitionArray(stories, options.partitionIndex, options.totalPartitions);
         }
         await page.close();
         console.log(`${stories.length} stories found`);
