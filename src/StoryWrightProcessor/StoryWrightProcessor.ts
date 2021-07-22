@@ -3,6 +3,7 @@ import { Browser, Page } from 'playwright';
 import { BrowserUtils } from './BrowserUtils';
 import { PlayWrightExecutor } from './PlayWrightExecutor';
 import { StoryWrightOptions } from './StoryWrightOptions'
+import { partitionArray } from '../utils';
 import {sep} from 'path';
 
 /**
@@ -27,9 +28,18 @@ export class StoryWrightProcessor {
         const page: Page = await context.newPage();
 
         await page.goto(join(options.url, 'iframe.html'));
-        const stories: object[] = await page.evaluate(
+        let stories: object[] = await page.evaluate(
           '(__STORYBOOK_CLIENT_API__?.raw() || []).map(e => ({id: e.id, kind: e.kind, name: e.name}))'
         );
+        if (options.totalPartitions > 1) {
+          console.log(
+            "Starting partitioning with ",
+            "Total partitions -", options.totalPartitions, "&",
+            "Partition index to select -", options.partitionIndex, "&",
+            "Total Stories length -", stories.length
+          );
+          stories = partitionArray(stories, options.partitionIndex, options.totalPartitions);
+        }
         await page.close();
         console.log(`${stories.length} stories found`);
         let storyIndex = 0;

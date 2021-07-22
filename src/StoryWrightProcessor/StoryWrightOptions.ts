@@ -8,4 +8,6 @@ export interface StoryWrightOptions {
   headless: boolean;
   concurrency: number;
   skipSteps: boolean;
+  partitionIndex: number;
+  totalPartitions: number;
 }
