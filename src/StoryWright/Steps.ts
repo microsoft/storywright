@@ -1,20 +1,20 @@
 type optionsObj = {
-  [key: string]: any
-}
+  [key: string]: any;
+};
 
 export class Steps {
   steps = [];
 
   public snapshot(name: string, opts?: optionsObj) {
     var step = {
-      type: 'saveScreenshot',
+      type: "saveScreenshot",
       name: name,
-      locator: {}
+      locator: {},
     };
-    if (opts && typeof opts.cropTo === 'string') {
-      step.type = 'cropScreenshot';
+    if (opts && typeof opts.cropTo === "string") {
+      step.type = "cropScreenshot";
       step.locator = {
-        value: opts.cropTo
+        value: opts.cropTo,
       };
     }
     this.steps.push(step);
@@ -23,8 +23,8 @@ export class Steps {
 
   public url(url: string) {
     var step = {
-      type: 'url',
-      url: url
+      type: "url",
+      url: url,
     };
     this.steps.push(step);
     return this;
@@ -36,11 +36,11 @@ export class Steps {
 
   public click(selector: string, options?: optionsObj) {
     var step = {
-      type: 'clickElement',
+      type: "clickElement",
       locator: {
-        value: selector
+        value: selector,
       },
-      maxTime: ''
+      maxTime: "",
     };
     if (options && options.maxTime) {
       step.maxTime = options.maxTime;
@@ -51,10 +51,10 @@ export class Steps {
 
   public hover(selector: string) {
     var step = {
-      type: 'moveTo',
+      type: "moveTo",
       locator: {
-        value: selector
-      }
+        value: selector,
+      },
     };
     this.steps.push(step);
     return this;
@@ -62,12 +62,12 @@ export class Steps {
 
   public mouseDown(selector: string) {
     var step = {
-      type: 'clickAndHoldElement',
-      locator: {}
+      type: "clickAndHoldElement",
+      locator: {},
     };
     if (selector) {
       step.locator = {
-        value: selector
+        value: selector,
       };
     }
     this.steps.push(step);
@@ -76,12 +76,12 @@ export class Steps {
 
   public mouseUp(selector: string) {
     var step = {
-      type: 'releaseElement',
-      locator: {}
+      type: "releaseElement",
+      locator: {},
     };
     if (selector) {
       step.locator = {
-        value: selector
+        value: selector,
       };
     }
     this.steps.push(step);
@@ -90,12 +90,12 @@ export class Steps {
 
   public setValue(selector: string, text: string, options?: optionsObj) {
     var step = {
-      type: 'setElementText',
+      type: "setElementText",
       locator: {
-        value: selector
+        value: selector,
       },
       text: text,
-      isPassword: false
+      isPassword: false,
     };
     if (options && options.isPassword) {
       step.isPassword = true;
@@ -106,10 +106,10 @@ export class Steps {
 
   public clearValue(selector: string) {
     var step = {
-      type: 'clearElementText',
+      type: "clearElementText",
       locator: {
-        value: selector
-      }
+        value: selector,
+      },
     };
     this.steps.push(step);
     return this;
@@ -117,24 +117,24 @@ export class Steps {
 
   public keys(selector: string, keys: string) {
     var step = {
-      type: 'sendKeys',
+      type: "sendKeys",
       locator: {
-        value: selector
+        value: selector,
       },
-      keys: keys
+      keys: keys,
     };
     this.steps.push(step);
     return this;
   }
 
   public focus(selector: string) {
-    return this.keys(selector, '');
+    return this.keys(selector, "");
   }
 
   public executeScript(code: string) {
     var step = {
-      type: 'executeScript',
-      code: code
+      type: "executeScript",
+      code: code,
     };
     this.steps.push(step);
     return this;
@@ -142,17 +142,17 @@ export class Steps {
 
   public wait(msOrSelector, options?: optionsObj) {
     var step;
-    if (typeof msOrSelector === 'number') {
+    if (typeof msOrSelector === "number") {
       step = {
-        type: 'pause',
-        waitTime: msOrSelector
+        type: "pause",
+        waitTime: msOrSelector,
       };
     } else {
       step = {
-        type: 'waitForElementPresent',
+        type: "waitForElementPresent",
         locator: {
-          value: msOrSelector
-        }
+          value: msOrSelector,
+        },
       };
       if (options && options.maxTime) {
         step.maxTime = options.maxTime;
@@ -164,11 +164,11 @@ export class Steps {
 
   public waitForNotFound(selector: string, options?: optionsObj) {
     var step = {
-      type: 'waitForElementNotPresent',
+      type: "waitForElementNotPresent",
       locator: {
-        value: selector
+        value: selector,
       },
-      maxTime: ''
+      maxTime: "",
     };
     if (options && options.maxTime) {
       step.maxTime = options.maxTime;
@@ -179,8 +179,8 @@ export class Steps {
 
   public cssAnimations(isEnabled: boolean) {
     var step = {
-      type: 'cssAnimations',
-      isEnabled: isEnabled
+      type: "cssAnimations",
+      isEnabled: isEnabled,
     };
     this.steps.push(step);
     return this;
@@ -188,25 +188,26 @@ export class Steps {
 }
 
 export interface Locator {
-  type: 'css selector';
+  type: "css selector";
   value: string;
 }
 
-export type StepType = 'url' |
-  'saveScreenshot' |
-  'cropScreenshot' |
-  'clickElement' |
-  'moveTo' |
-  'clickAndHoldElement' |
-  'releaseElement' |
-  'setElementText' |
-  'sendKeys' |
-  'executeScript' |
-  'ignoreElements' |
-  'pause' |
-  'waitForElementPresent' |
-  'waitForElementNotPresent' |
-  'cssAnimations';
+export type StepType =
+  | "url"
+  | "saveScreenshot"
+  | "cropScreenshot"
+  | "clickElement"
+  | "moveTo"
+  | "clickAndHoldElement"
+  | "releaseElement"
+  | "setElementText"
+  | "sendKeys"
+  | "executeScript"
+  | "ignoreElements"
+  | "pause"
+  | "waitForElementPresent"
+  | "waitForElementNotPresent"
+  | "cssAnimations";
 
 export interface Step {
   type: StepType;

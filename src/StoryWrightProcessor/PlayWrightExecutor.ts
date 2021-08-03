@@ -1,44 +1,51 @@
-import * as fs from 'fs';
-import { Page } from 'playwright';
-import {sep} from 'path';
+import * as fs from "fs";
+import { Page } from "playwright";
+import { sep } from "path";
 /**
  * Class containing playwright exposed functions.
  */
 export class PlayWrightExecutor {
   private fileSuffix: number = 0;
 
-  constructor(private page: Page, private path: String, private ssNamePrefix: String, private browserName: string) { }
+  constructor(
+    private page: Page,
+    private path: String,
+    private ssNamePrefix: String,
+    private browserName: string
+  ) {}
 
   public async exposeFunctions() {
-    await this.page.exposeFunction('makeScreenshot', this.makeScreenshot);
-    await this.page.exposeFunction('click', this.click);
-    await this.page.exposeFunction('hover', this.hover);
-    await this.page.exposeFunction('wait', this.waitForSelector);
-    await this.page.exposeFunction('waitForNotFound', this.waitForNotFound);
-    await this.page.exposeFunction('elementScreenshot', this.elementScreenshot);
-    await this.page.exposeFunction('done', this.done);
-    await this.page.exposeFunction('setElementText', this.setElementText);
-    await this.page.exposeFunction('pressKey', this.pressKey);
-    await this.page.exposeFunction('executeScript', this.executeScript);
-    await this.page.exposeFunction('focus', this.focus);
-    await this.page.exposeFunction('mouseDown', this.mouseDown);
-    await this.page.exposeFunction('mouseUp', this.mouseUp);
+    await this.page.exposeFunction("makeScreenshot", this.makeScreenshot);
+    await this.page.exposeFunction("click", this.click);
+    await this.page.exposeFunction("hover", this.hover);
+    await this.page.exposeFunction("wait", this.waitForSelector);
+    await this.page.exposeFunction("waitForNotFound", this.waitForNotFound);
+    await this.page.exposeFunction("elementScreenshot", this.elementScreenshot);
+    await this.page.exposeFunction("done", this.done);
+    await this.page.exposeFunction("setElementText", this.setElementText);
+    await this.page.exposeFunction("pressKey", this.pressKey);
+    await this.page.exposeFunction("executeScript", this.executeScript);
+    await this.page.exposeFunction("focus", this.focus);
+    await this.page.exposeFunction("mouseDown", this.mouseDown);
+    await this.page.exposeFunction("mouseUp", this.mouseUp);
   }
 
   private mouseUp = async () => {
     try {
       await this.page.mouse.up();
     } catch (err) {
-      console.error('ERROR: mouseUp: ', err.message);
+      console.error("ERROR: mouseUp: ", err.message);
       throw err;
     }
-  }
+  };
 
   private mouseDown = async (selector: string) => {
     try {
       let element;
-      if (selector.charAt(0) === '#') {
-        element = await this.page.$(`id=${selector.substring(1, selector.length)}`)
+      if (selector.charAt(0) === "#") {
+        element = await this.page.$(
+          `id=${selector.substring(1, selector.length)}`
+        );
       } else {
         element = await this.page.$(selector);
       }
@@ -46,73 +53,73 @@ export class PlayWrightExecutor {
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await this.page.mouse.down();
     } catch (err) {
-      console.error('ERROR: mouseDown: ', err.message);
+      console.error("ERROR: mouseDown: ", err.message);
       throw err;
     }
-  }
+  };
 
   private focus = async (selector: string) => {
     try {
       await this.page.focus(selector);
     } catch (err) {
-      console.error('ERROR: focus: ', err.message);
+      console.error("ERROR: focus: ", err.message);
       throw err;
     }
-  }
+  };
 
   private executeScript = async (script: string) => {
     try {
       await this.page.evaluate(script);
     } catch (err) {
-      console.error('ERROR: executeScript: ', err.message);
+      console.error("ERROR: executeScript: ", err.message);
       throw err;
     }
-  }
+  };
 
   private pressKey = async (selector: string, key: string) => {
     try {
       await this.page.press(selector, key);
     } catch (err) {
-      console.error('ERROR: pressKey: ', err.message);
+      console.error("ERROR: pressKey: ", err.message);
       throw err;
     }
-  }
+  };
 
   private setElementText = async (selector: string, text: string) => {
     try {
       const element = await this.page.$(selector);
       await element.fill(text);
     } catch (err) {
-      console.error('ERROR: setElementText: ', err.message);
+      console.error("ERROR: setElementText: ", err.message);
       throw err;
     }
-  }
+  };
 
   private click = async (selector: string) => {
     try {
       const element = await this.page.$(selector);
       await element.click({
-        force: true
+        force: true,
       });
-      console.log('element clicked');
+      console.log("element clicked");
     } catch (err) {
-      console.error('ERROR: click: ', err.message);
+      console.error("ERROR: click: ", err.message);
       throw err;
     }
-  }
+  };
 
   private makeScreenshot = async (testName?: string) => {
     try {
       let screenshotPath = this.getScreenshotPath(testName);
 
       await this.page.screenshot({
-        path: screenshotPath
+        path: screenshotPath,
       });
     } catch (err) {
-      console.error('ERROR: PAGE_SCREENSHOT: ', err.message);
+      console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
       throw err;
     }
-  }
+  };
 
   private elementScreenshot = async (selector: string, testName: string) => {
     try {
@@ -121,78 +128,75 @@ export class PlayWrightExecutor {
         let screenshotPath = this.getScreenshotPath(testName);
 
         await element.screenshot({
-          path: screenshotPath
+          path: screenshotPath,
         });
       } else {
-        console.log('ERROR: Element NOT VISIBLE: CAPTURING PAGE');
+        console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
         await this.makeScreenshot(testName);
       }
-
     } catch (err) {
-      console.error('ERROR: ELEMENT_SCREENSHOT: ', err.message);
-      console.info('Trying full page screenshot');
+      console.error("ERROR: ELEMENT_SCREENSHOT: ", err.message);
+      console.info("Trying full page screenshot");
       await this.makeScreenshot(testName);
     }
-
-  }
+  };
 
   private hover = async (selector: string) => {
     try {
       const element = await this.page.$(selector);
       await element.hover({
-        force: true
+        force: true,
       });
     } catch (err) {
-      console.error('ERROR: HOVER: ', err.message);
+      console.error("ERROR: HOVER: ", err.message);
       throw err;
     }
-
-  }
+  };
 
   private waitForSelector = async (selector: string) => {
     try {
       await this.page.waitForSelector(selector);
     } catch (err) {
-      console.error('ERROR: waitForSelector: ', err.message);
+      console.error("ERROR: waitForSelector: ", err.message);
       throw err;
     }
-  }
+  };
 
   private waitForNotFound = async (selector: string) => {
     try {
-      await this.page.waitForSelector(selector, { state: 'detached' });
+      await this.page.waitForSelector(selector, { state: "detached" });
     } catch (err) {
-      console.error('ERROR: waitForNotFound: ', err.message);
+      console.error("ERROR: waitForNotFound: ", err.message);
       throw err;
     }
-  }
+  };
 
   private done = async () => {
     try {
       await this.page.close();
     } catch (err) {
-      console.error('ERROR: completed steps: ', err.message);
+      console.error("ERROR: completed steps: ", err.message);
       throw err;
     }
-  }
+  };
 
   private getScreenshotPath(testName?: String) {
-    this.ssNamePrefix = this.ssNamePrefix.replace(/:/g, '-');
+    this.ssNamePrefix = this.ssNamePrefix.replace(/:/g, "-");
     let screenshotPath: string;
 
-    if(testName){
-      testName = testName.replace(/:/g, '-');
+    if (testName) {
+      testName = testName.replace(/:/g, "-");
       screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`;
-    }else{
+    } else {
       screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`;
     }
 
     //INFO: Append file prefix if screenshot with same name exist.
-    if (fs.existsSync(screenshotPath + '.png')) {
-      screenshotPath = screenshotPath + '_' + (++this.fileSuffix);
+    if (fs.existsSync(screenshotPath + ".png")) {
+      screenshotPath = screenshotPath + "_" + ++this.fileSuffix;
     }
 
-    screenshotPath += '.png';
+    screenshotPath += ".png";
 
     console.debug(`ScreenshotPath ${screenshotPath}`);
     return screenshotPath;
