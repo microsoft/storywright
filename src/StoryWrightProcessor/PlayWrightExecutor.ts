@@ -9,8 +9,8 @@ export class PlayWrightExecutor {
 
   constructor(
     private page: Page,
-    private path: String,
-    private ssNamePrefix: String,
+    private path: string,
+    private ssNamePrefix: string,
     private browserName: string
   ) {}
 
@@ -28,6 +28,16 @@ export class PlayWrightExecutor {
     await this.page.exposeFunction("focus", this.focus);
     await this.page.exposeFunction("mouseDown", this.mouseDown);
     await this.page.exposeFunction("mouseUp", this.mouseUp);
+    await this.page.exposeFunction("waitForTimeout", this.waitForTimeout);
+  }
+
+  private waitForTimeout = async (waitTime: number) => {
+    try {
+      await this.page.waitForTimeout(waitTime);
+    } catch (err) {
+      console.error("ERROR: waitForTimeout: ", err.message);
+      throw err;
+    }
   }
 
   private mouseUp = async () => {
@@ -42,13 +52,7 @@ export class PlayWrightExecutor {
   private mouseDown = async (selector: string) => {
     try {
       let element;
-      if (selector.charAt(0) === "#") {
-        element = await this.page.$(
-          `id=${selector.substring(1, selector.length)}`
-        );
-      } else {
-        element = await this.page.$(selector);
-      }
+      element = await this.page.$(selector);
       const box = await element.boundingBox();
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await this.page.mouse.down();
@@ -97,6 +101,9 @@ export class PlayWrightExecutor {
 
   private click = async (selector: string) => {
     try {
+      console.log("selector: ", selector);
+      selector = this.curateSelector(selector);
+      console.log("final selector: ", selector);
       const element = await this.page.$(selector);
       await element.click({
         force: true,
@@ -143,6 +150,7 @@ export class PlayWrightExecutor {
 
   private hover = async (selector: string) => {
     try {
+      console.log(`selector: ${selector}`);
       const element = await this.page.$(selector);
       await element.hover({
         force: true,
@@ -186,9 +194,9 @@ export class PlayWrightExecutor {
 
     if (testName) {
       testName = testName.replace(/:/g, "-");
-      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`;
+      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
-      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`;
+      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`);
     }
 
     //INFO: Append file prefix if screenshot with same name exist.
@@ -200,5 +208,35 @@ export class PlayWrightExecutor {
 
     console.debug(`ScreenshotPath ${screenshotPath}`);
     return screenshotPath;
+  }
+
+  // INFO: Removes non-ASCII characters
+  private removeNonASCIICharacters(name: string){
+    return name.replace(/[^\x00-\x7F]/g,"");
+  }
+
+  // INFO: Add double quotes around selector if missing
+  private curateSelector(selector: string){
+    let newSelector = "";
+
+    if(selector.indexOf("=") == -1){
+      return selector;
+    }
+    newSelector = selector.substring(0, selector.indexOf("=")+1);
+
+    while(selector.indexOf("[") > -1 && selector.indexOf("=") > -1){
+      let temp = selector.substring(selector.indexOf("=") + 1, selector.indexOf("]"));
+
+      if(!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')){
+        temp = '"' + temp + '"';
+      }
+      newSelector += temp + "]";
+      selector = selector.substring(selector.indexOf("]")+1, selector.length);
+    }
+    if(selector.length > 0){
+      newSelector += selector;
+    }
+
+    return newSelector;
   }
 }

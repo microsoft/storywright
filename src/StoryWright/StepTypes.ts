@@ -10,4 +10,5 @@ export enum StepType {
   ExecuteScript = "executeScript",
   ClickAndHoldElement = "clickAndHoldElement",
   ReleaseElement = "releaseElement",
+  WaitForTimeout = 'pause'
 }

@@ -82,6 +82,10 @@ export class BrowserExecutor {
           await TestExecutorActions.mouseUp();
           break;
         }
+        case StepType.WaitForTimeout: {
+          await TestExecutorActions.waitForTimeout(step.waitTime);
+          break;
+        }
       }
     }
     // Once all steps are executed close the browser page.

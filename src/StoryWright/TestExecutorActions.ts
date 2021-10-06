@@ -4,6 +4,7 @@ const TestExecutorWindow = window as unknown as {
   hover: (selector: string) => Promise<void>;
   click: (selector: string) => Promise<void>;
   wait: (selector: string) => Promise<void>;
+  waitForTimeout: (waitTime: number) => Promise<void>;
   waitForNotFound: (selector: string) => Promise<void>;
   elementScreenshot: (selector: string, testName: string) => Promise<void>;
   moveTo: (selector: string) => Promise<void>;
@@ -42,6 +43,9 @@ export default {
   },
   wait: async (selector: string) => {
     await TestExecutorWindow.wait(selector);
+  },
+  waitForTimeout: async (waitTime: number) => {
+    await TestExecutorWindow.waitForTimeout(waitTime);
   },
   waitForNotFound: async (selector: string) => {
     await TestExecutorWindow.waitForNotFound(selector);
