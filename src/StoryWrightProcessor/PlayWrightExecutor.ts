@@ -101,7 +101,6 @@ export class PlayWrightExecutor {
 
   private click = async (selector: string) => {
     try {
-      console.log("selector: ", selector);
       selector = this.curateSelector(selector);
       console.log("final selector: ", selector);
       const element = await this.page.$(selector);
@@ -150,7 +149,6 @@ export class PlayWrightExecutor {
 
   private hover = async (selector: string) => {
     try {
-      console.log(`selector: ${selector}`);
       const element = await this.page.$(selector);
       await element.hover({
         force: true,
@@ -215,22 +213,35 @@ export class PlayWrightExecutor {
     return name.replace(/[^\x00-\x7F]/g,"");
   }
 
-  // INFO: Add double quotes around selector if missing
-  private curateSelector(selector: string){
-    let newSelector = "";
 
+  /*  This will insert double quotes around selector string, if missing.
+      Eg: buttonbutton[data-id=ex123][attr=ex432] will be changed to button[data-id="ex123"][attr="ex432"] 
+  */
+  private curateSelector(selector: string){
+    //No need to check if selector doesn't contain equals to (=)
     if(selector.indexOf("=") == -1){
       return selector;
     }
+
+    let newSelector = "";
     newSelector = selector.substring(0, selector.indexOf("=")+1);
 
+    //Loop through all attributes 
     while(selector.indexOf("[") > -1 && selector.indexOf("=") > -1){
+      /*  Pulls out chars b/w equals to (=) and closing square bracket (])
+          Eg: button[data-id=ex123] will give "ex123" to temp
+      */
       let temp = selector.substring(selector.indexOf("=") + 1, selector.indexOf("]"));
 
+      // Check if temp is not surrounded by either double/single quotes
       if(!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')){
         temp = '"' + temp + '"';
       }
+
       newSelector += temp + "]";
+
+      // Move to the next chunk to curate 
+      // Eg: If buttonbutton[data-id=ex123][attr=ex432] then move selector to [attr=432]
       selector = selector.substring(selector.indexOf("]")+1, selector.length);
     }
     if(selector.length > 0){

@@ -66,7 +66,7 @@ export class StoryWrightProcessor {
             itemsForBatch.map(async (story: object) => {
               const id: string = story["id"];
               // Set story category and name as prefix for screenshot name.
-              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-"); //INFO: '/' in screenshot name creates a folder in screenshot location. Replacing with '-'
+              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let page: Page;
               try {
                 page = await context.newPage();
