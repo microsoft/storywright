@@ -52,6 +52,7 @@ export class PlayWrightExecutor {
   private mouseDown = async (selector: string) => {
     try {
       let element;
+      selector = this.curateSelector(selector);
       element = await this.page.$(selector);
       const box = await element.boundingBox();
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -64,6 +65,7 @@ export class PlayWrightExecutor {
 
   private focus = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.focus(selector);
     } catch (err) {
       console.error("ERROR: focus: ", err.message);
@@ -82,6 +84,7 @@ export class PlayWrightExecutor {
 
   private pressKey = async (selector: string, key: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.press(selector, key);
     } catch (err) {
       console.error("ERROR: pressKey: ", err.message);
@@ -91,6 +94,7 @@ export class PlayWrightExecutor {
 
   private setElementText = async (selector: string, text: string) => {
     try {
+      selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
       await element.fill(text);
     } catch (err) {
@@ -102,7 +106,6 @@ export class PlayWrightExecutor {
   private click = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
-      console.log("final selector: ", selector);
       const element = await this.page.$(selector);
       await element.click({
         force: true,
@@ -129,6 +132,7 @@ export class PlayWrightExecutor {
 
   private elementScreenshot = async (selector: string, testName: string) => {
     try {
+      selector = this.curateSelector(selector);
       let element = await this.page.$(selector);
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
@@ -149,6 +153,7 @@ export class PlayWrightExecutor {
 
   private hover = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
       await element.hover({
         force: true,
@@ -161,6 +166,7 @@ export class PlayWrightExecutor {
 
   private waitForSelector = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector);
     } catch (err) {
       console.error("ERROR: waitForSelector: ", err.message);
@@ -170,6 +176,7 @@ export class PlayWrightExecutor {
 
   private waitForNotFound = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector, { state: "detached" });
     } catch (err) {
       console.error("ERROR: waitForNotFound: ", err.message);
