@@ -32,7 +32,7 @@ export class StoryWrightProcessor {
 
         await page.goto(join(options.url, "iframe.html"));
         let stories: object[] = await page.evaluate(
-          "(__STORYBOOK_CLIENT_API__?.raw() || []).map(e => ({id: e.id, kind: e.kind, name: e.name}))"
+         "(__STORYBOOK_CLIENT_API__?.raw() || []).map(e => ({id: e.id, kind: e.kind, name: e.name}))"
         );
         if (options.totalPartitions > 1) {
           console.log(
@@ -66,7 +66,7 @@ export class StoryWrightProcessor {
             itemsForBatch.map(async (story: object) => {
               const id: string = story["id"];
               // Set story category and name as prefix for screenshot name.
-              const ssNamePrefix = `${story["kind"]}.${story["name"]}`;
+              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let page: Page;
               try {
                 page = await context.newPage();

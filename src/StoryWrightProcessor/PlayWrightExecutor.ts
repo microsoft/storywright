@@ -9,8 +9,8 @@ export class PlayWrightExecutor {
 
   constructor(
     private page: Page,
-    private path: String,
-    private ssNamePrefix: String,
+    private path: string,
+    private ssNamePrefix: string,
     private browserName: string
   ) {}
 
@@ -28,6 +28,16 @@ export class PlayWrightExecutor {
     await this.page.exposeFunction("focus", this.focus);
     await this.page.exposeFunction("mouseDown", this.mouseDown);
     await this.page.exposeFunction("mouseUp", this.mouseUp);
+    await this.page.exposeFunction("waitForTimeout", this.waitForTimeout);
+  }
+
+  private waitForTimeout = async (waitTime: number) => {
+    try {
+      await this.page.waitForTimeout(waitTime);
+    } catch (err) {
+      console.error("ERROR: waitForTimeout: ", err.message);
+      throw err;
+    }
   }
 
   private mouseUp = async () => {
@@ -42,13 +52,8 @@ export class PlayWrightExecutor {
   private mouseDown = async (selector: string) => {
     try {
       let element;
-      if (selector.charAt(0) === "#") {
-        element = await this.page.$(
-          `id=${selector.substring(1, selector.length)}`
-        );
-      } else {
-        element = await this.page.$(selector);
-      }
+      selector = this.curateSelector(selector);
+      element = await this.page.$(selector);
       const box = await element.boundingBox();
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await this.page.mouse.down();
@@ -60,6 +65,7 @@ export class PlayWrightExecutor {
 
   private focus = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.focus(selector);
     } catch (err) {
       console.error("ERROR: focus: ", err.message);
@@ -78,6 +84,7 @@ export class PlayWrightExecutor {
 
   private pressKey = async (selector: string, key: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.press(selector, key);
     } catch (err) {
       console.error("ERROR: pressKey: ", err.message);
@@ -87,6 +94,7 @@ export class PlayWrightExecutor {
 
   private setElementText = async (selector: string, text: string) => {
     try {
+      selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
       await element.fill(text);
     } catch (err) {
@@ -97,6 +105,7 @@ export class PlayWrightExecutor {
 
   private click = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
       await element.click({
         force: true,
@@ -123,6 +132,7 @@ export class PlayWrightExecutor {
 
   private elementScreenshot = async (selector: string, testName: string) => {
     try {
+      selector = this.curateSelector(selector);
       let element = await this.page.$(selector);
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
@@ -143,6 +153,7 @@ export class PlayWrightExecutor {
 
   private hover = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
       await element.hover({
         force: true,
@@ -155,6 +166,7 @@ export class PlayWrightExecutor {
 
   private waitForSelector = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector);
     } catch (err) {
       console.error("ERROR: waitForSelector: ", err.message);
@@ -164,6 +176,7 @@ export class PlayWrightExecutor {
 
   private waitForNotFound = async (selector: string) => {
     try {
+      selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector, { state: "detached" });
     } catch (err) {
       console.error("ERROR: waitForNotFound: ", err.message);
@@ -186,9 +199,9 @@ export class PlayWrightExecutor {
 
     if (testName) {
       testName = testName.replace(/:/g, "-");
-      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`;
+      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
-      screenshotPath = `${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`;
+      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`);
     }
 
     //INFO: Append file prefix if screenshot with same name exist.
@@ -200,5 +213,48 @@ export class PlayWrightExecutor {
 
     console.debug(`ScreenshotPath ${screenshotPath}`);
     return screenshotPath;
+  }
+
+  // INFO: Removes non-ASCII characters
+  private removeNonASCIICharacters(name: string){
+    return name.replace(/[^\x00-\x7F]/g,"");
+  }
+
+
+  /*  This will insert double quotes around selector string, if missing.
+      Eg: buttonbutton[data-id=ex123][attr=ex432] will be changed to button[data-id="ex123"][attr="ex432"] 
+  */
+  private curateSelector(selector: string){
+    //No need to check if selector doesn't contain equals to (=)
+    if(selector.indexOf("=") == -1){
+      return selector;
+    }
+
+    let newSelector = "";
+    newSelector = selector.substring(0, selector.indexOf("=")+1);
+
+    //Loop through all attributes 
+    while(selector.indexOf("[") > -1 && selector.indexOf("=") > -1){
+      /*  Pulls out chars b/w equals to (=) and closing square bracket (])
+          Eg: button[data-id=ex123] will give "ex123" to temp
+      */
+      let temp = selector.substring(selector.indexOf("=") + 1, selector.indexOf("]"));
+
+      // Check if temp is not surrounded by either double/single quotes
+      if(!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')){
+        temp = '"' + temp + '"';
+      }
+
+      newSelector += temp + "]";
+
+      // Move to the next chunk to curate 
+      // Eg: If buttonbutton[data-id=ex123][attr=ex432] then move selector to [attr=432]
+      selector = selector.substring(selector.indexOf("]")+1, selector.length);
+    }
+    if(selector.length > 0){
+      newSelector += selector;
+    }
+
+    return newSelector;
   }
 }
