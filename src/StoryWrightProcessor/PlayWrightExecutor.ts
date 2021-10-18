@@ -1,20 +1,168 @@
 import * as fs from "fs";
-import { Page } from "playwright";
+import { Page, Frame } from "playwright";
 import { sep } from "path";
 /**
  * Class containing playwright exposed functions.
  */
 export class PlayWrightExecutor {
   private fileSuffix: number = 0;
+  private isPageBusy;
 
   constructor(
     private page: Page,
     private path: string,
     private ssNamePrefix: string,
     private browserName: string
-  ) {}
+  ) {
+  }
+
+  private async getIsPageBusyMethod() {
+    const busy = {
+      pendingPromises: 0,
+      pendingTimeouts: 0,
+      networkOrCpu: 0,
+      mutatedDom: 0,
+    };
+  
+    this.page.on("framenavigated", (frame: Frame) => {
+      if (!frame.parentFrame()) {
+        busy.pendingPromises = 0;
+        busy.pendingTimeouts = 0;
+        busy.networkOrCpu = 0;
+        busy.mutatedDom = 0;
+      }
+    });
+  
+    await this.page.exposeFunction("__pwBusy__", (key: string) => {
+      if (key === "promises++") {
+        busy.pendingPromises++;
+      } else if (key === "promises--") {
+        busy.pendingPromises--;
+      } else if (key === "timeouts++") {
+        busy.pendingTimeouts++;
+      } else if (key === "timeouts--") {
+        busy.pendingTimeouts--;
+      } else if (key === "dom++") {
+        busy.mutatedDom++;
+      } else if (key === "dom--") {
+        busy.mutatedDom--;
+      }
+    });
+  
+    this.page.addInitScript(`{
+        const _promiseConstructor = window.Promise.constructor;
+        const _timeoutIds = new Set();
+        const _setTimeout = window.setTimeout;
+        const _clearTimeout = window.clearTimeout;
+  
+        new MutationObserver(() => {
+          window.__pwBusy__("dom++");
+          requestAnimationFrame(() => { window.__pwBusy__("dom--"); });
+        }).observe(document, { attributes: true, childList: true, subtree: true });
+  
+        // Patch Promise constructor
+        window.Promise.constructor = async (resolve, reject) => {
+          window.__pwBusy__("promises++");
+  
+          const res = resolve && (async () => {
+            let val;
+            try {
+              val = await resolve();
+            } catch(err) {
+              throw err;
+            } finally {
+              window.__pwBusy__("promises--");
+            }
+            return val;
+          });
+  
+          const rej = reject && (async () => {
+            let val;
+            try {
+              val = await reject();
+            } catch(err) {
+              throw err;
+            } finally {
+              window.__pwBusy__("promises--");
+            }
+            return val;
+          });
+  
+          return _promiseConstructor.call(this, res, rej);
+        };
+  
+        // Path window.clearTimeout
+        window.clearTimeout = (id) => {
+          _clearTimeout(id);
+          if (_timeoutIds.has(id)) {
+            _timeoutIds.delete(id);
+            window.__pwBusy__("timeouts--");
+          }
+        };
+        // Patch window.setTimeout in the near future
+        window.setTimeout = (...args) => {
+          const ms = args[1];
+          const isInNearFuture = ms < 1000 * 5;
+          if (isInNearFuture) {
+            window.__pwBusy__("timeouts++");
+            const fn = args[0];
+            if (typeof(fn) === "function") {
+              args[0]  = () => {
+                try {
+                  fn();
+                } catch(err) {
+                } finally {
+                  window.__pwBusy__("timeouts--");
+                }
+              };
+            } else {
+              args[0]  = "try{" + args[0] + "; }catch(err){};window.__pwBusy__('timeouts--');";
+            }
+          }
+  
+          const timeoutId = _setTimeout.apply(this, args);
+  
+          if (isInNearFuture) {
+            _timeoutIds.add(timeoutId);
+          }
+  
+          return timeoutId;
+        };
+    }`);
+  
+    return async (): Promise<boolean> => {
+      // Check if the network or CPU are idle
+      const now = Date.now();
+      await this.page.waitForLoadState("networkidle");
+      await this.page.evaluate(`new Promise(resolve => {
+        window.requestIdleCallback(() => { resolve(); });
+      })`);
+      busy.networkOrCpu = Math.max(0, Date.now() - now - 3); // Allow a short delay due to node/browser bridge
+  
+      const isBusy =
+        busy.networkOrCpu +
+          busy.mutatedDom +
+          busy.pendingPromises +
+          busy.pendingTimeouts >
+        0;
+  
+      return isBusy;
+    };
+  };
+
+  private async checkIfPageIsBusy() {
+    // Wait while the page is busy before screenshot'ing the story
+    let busyTime = 0;
+    const busyTimeout = 1000; // WHATEVER REASONABLE TIME WE DECIDE
+    const startBusyTime = Date.now();
+    do {
+      await this.page.waitForTimeout(50);
+      busyTime = Date.now() - startBusyTime;
+    } while (busyTime < busyTimeout && (await this.isPageBusy()));
+  } 
 
   public async exposeFunctions() {
+    this.isPageBusy = await this.getIsPageBusyMethod(); 
     await this.page.exposeFunction("makeScreenshot", this.makeScreenshot);
     await this.page.exposeFunction("click", this.click);
     await this.page.exposeFunction("hover", this.hover);
@@ -120,7 +268,7 @@ export class PlayWrightExecutor {
   private makeScreenshot = async (testName?: string) => {
     try {
       let screenshotPath = this.getScreenshotPath(testName);
-
+      await this.checkIfPageIsBusy();
       await this.page.screenshot({
         path: screenshotPath,
       });
@@ -137,6 +285,7 @@ export class PlayWrightExecutor {
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
 
+        await this.checkIfPageIsBusy();
         await element.screenshot({
           path: screenshotPath,
         });
