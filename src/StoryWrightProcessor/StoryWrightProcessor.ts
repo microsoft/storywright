@@ -77,6 +77,20 @@ export class StoryWrightProcessor {
                   height: 964,
                 });
 
+                // Add basic CSS normalization
+                page.addInitScript(() => {
+                  document.addEventListener("DOMContentLoaded", () => {
+                    const style = document.createElement("style");
+                    style.textContent = `
+                      /* Hide caret */
+                      * { caret-color: transparent !important; }
+                      /* Instant transitions and animations */
+                      * > * { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+                    `;
+                    document.head.appendChild(style);
+                  });
+                });
+
                 //TODO: Take screenshots when user doesn't want steps to be executed.
                 if (options.skipSteps) {
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
