@@ -64,12 +64,18 @@ export class StoryWrightProcessor {
           );
           await Promise.all(
             itemsForBatch.map(async (story: object) => {
-              const id: string = story["id"];
+              const id: string = story["id"]; 
+                   
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let page: Page;
               try {
                 page = await context.newPage();
+                const styleString = `
+                  input { 
+                    caret-color: transparent !important; 
+                  }
+                `;
                 // TODO : Move these values in config.
                 // TODO : Expose a method in Steps to set viewport size.
                 await page.setViewportSize({
@@ -94,6 +100,27 @@ export class StoryWrightProcessor {
                 //TODO: Take screenshots when user doesn't want steps to be executed.
                 if (options.skipSteps) {
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  
+                  // Add style to page
+                  await page.addStyleTag({
+                    content: styleString
+                  });
+
+                  const isPageBusy = await new PlayWrightExecutor(
+                    page,
+                    options.screenShotDestPath,
+                    ssNamePrefix,
+                    browserName
+                  ).getIsPageBusyMethod();                  
+
+                  let busyTime = 0;
+                  const busyTimeout = 1000 * 5; // WHATEVER REASONABLE TIME WE DECIDE
+                  const startBusyTime = Date.now();
+                  do {
+                    await page.waitForTimeout(50);
+                    busyTime = Date.now() - startBusyTime;
+                  } while (busyTime < busyTimeout && (await isPageBusy()));
+
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
                   await page.screenshot({
                     path:
@@ -107,6 +134,11 @@ export class StoryWrightProcessor {
                     browserName
                   ).exposeFunctions();
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  
+                  // Add style to make cursor transparent from input fields
+                  await page.addStyleTag({
+                    content: styleString
+                  });
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
 
                   // Wait for close event to be fired from steps. Default timeout is 30 seconds.
