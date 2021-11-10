@@ -66,9 +66,6 @@ export class StoryWrightProcessor {
             itemsForBatch.map(async (story: object) => {
               const id: string = story["id"]; 
               
-              if(!id.includes("DesignerTaskPane".toLowerCase())){
-                return;
-              }
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let page: Page;
@@ -89,7 +86,7 @@ export class StoryWrightProcessor {
                       /* Hide caret */
                       * { caret-color: transparent !important; }
                       /* Instant transitions and animations */
-                      * > * { transition-duration: 0.0001ms !important; animation-duration: 0.0001ms !important; }
+                      * > * { transition-duration: 0.0001ms !important; animation-duration: 0ms !important; }
                     `;
                     document.head.appendChild(style);
                   });
