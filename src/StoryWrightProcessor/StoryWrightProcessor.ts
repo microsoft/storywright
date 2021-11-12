@@ -64,7 +64,8 @@ export class StoryWrightProcessor {
           );
           await Promise.all(
             itemsForBatch.map(async (story: object) => {
-              const id: string = story["id"];
+              const id: string = story["id"]; 
+              
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let page: Page;
@@ -77,9 +78,41 @@ export class StoryWrightProcessor {
                   height: 964,
                 });
 
+                // Add basic CSS normalization
+                page.addInitScript(() => {
+                  document.addEventListener("DOMContentLoaded", () => {
+                    const style = document.createElement("style");
+                    style.textContent = `
+                      /* Hide caret */
+                      * { caret-color: transparent !important; }
+                      /* Instant transitions and animations */
+                      * > * { transition-duration: 0.0001ms !important; animation-duration: 0ms !important; }
+                    `;
+                    document.head.appendChild(style);
+                  });
+                });
+
                 //TODO: Take screenshots when user doesn't want steps to be executed.
                 if (options.skipSteps) {
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  
+                  // Add style to page
+                  
+                  const isPageBusy = await new PlayWrightExecutor(
+                    page,
+                    options.screenShotDestPath,
+                    ssNamePrefix,
+                    browserName
+                  ).getIsPageBusyMethod();                  
+
+                  let busyTime = 0;
+                  const busyTimeout = 1000 * 5; // WHATEVER REASONABLE TIME WE DECIDE
+                  const startBusyTime = Date.now();
+                  do {
+                    await page.waitForTimeout(50);
+                    busyTime = Date.now() - startBusyTime;
+                  } while (busyTime < busyTimeout && (await isPageBusy()));
+
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
                   await page.screenshot({
                     path:
@@ -93,6 +126,9 @@ export class StoryWrightProcessor {
                     browserName
                   ).exposeFunctions();
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  
+                  // Add style to make cursor transparent from input fields
+                 
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
 
                   // Wait for close event to be fired from steps. Default timeout is 30 seconds.

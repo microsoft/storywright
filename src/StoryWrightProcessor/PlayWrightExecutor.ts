@@ -16,7 +16,7 @@ export class PlayWrightExecutor {
   ) {
   }
 
-  private async getIsPageBusyMethod() {
+  public async getIsPageBusyMethod() {
     const busy = {
       pendingPromises: 0,
       pendingTimeouts: 0,
