@@ -27,13 +27,14 @@ export class StoryWrightProcessor {
           browserName,
           options.headless
         );
-        const context = await browser.newContext();
+        let context = await browser.newContext();
         const page: Page = await context.newPage();
 
         await page.goto(join(options.url, "iframe.html"));
         let stories: object[] = await page.evaluate(
          "(__STORYBOOK_CLIENT_API__?.raw() || []).map(e => ({id: e.id, kind: e.kind, name: e.name}))"
         );
+        // console.log(`stories: ${JSON.stringify(stories)}`);
         if (options.totalPartitions > 1) {
           console.log(
             "Starting partitioning with ",
@@ -62,13 +63,29 @@ export class StoryWrightProcessor {
             position,
             position + options.concurrency
           );
+          // console.log(`itemsforBatch: ${JSON.stringify(itemsForBatch)}`);
+          // context = await browser.newContext();
           await Promise.all(
             itemsForBatch.map(async (story: object) => {
               const id: string = story["id"]; 
               
+              // if(
+              //   !id.includes("ContextualUI-".toLowerCase())
+              // //  && !id.includes("FloatieSplitButton".toLowerCase())
+              // //   && !id.includes("ContextualCanvasMenu".toLowerCase())
+              // //   && !id.includes("AppToggleButton".toLowerCase())
+              // //   && !id.includes("RibbonToggleButton".toLowerCase())
+              // //   && !id.includes("RibbonToggleButtonNext".toLowerCase())
+              //   ){
+              //   return;
+              // }
+
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
+              // console.log(`ssNamePrefix ${ssNamePrefix}`);
               let page: Page;
+              // let _context = await browser.newContext();
+
               try {
                 page = await context.newPage();
                 // TODO : Move these values in config.
@@ -95,9 +112,7 @@ export class StoryWrightProcessor {
                 //TODO: Take screenshots when user doesn't want steps to be executed.
                 if (options.skipSteps) {
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
-                  
-                  // Add style to page
-                  
+
                   const isPageBusy = await new PlayWrightExecutor(
                     page,
                     options.screenShotDestPath,
@@ -126,8 +141,6 @@ export class StoryWrightProcessor {
                     browserName
                   ).exposeFunctions();
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
-                  
-                  // Add style to make cursor transparent from input fields
                  
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
 
@@ -154,6 +167,7 @@ export class StoryWrightProcessor {
       } finally {
         console.log("Closing process !!");
         if (browser != null && browser.isConnected()) {
+          console.log("Closing browser !!");
           await browser.close();
         }
         let endTime = Date.now();

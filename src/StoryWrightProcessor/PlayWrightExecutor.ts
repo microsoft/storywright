@@ -153,7 +153,7 @@ export class PlayWrightExecutor {
   private async checkIfPageIsBusy() {
     // Wait while the page is busy before screenshot'ing the story
     let busyTime = 0;
-    const busyTimeout = 1000; // WHATEVER REASONABLE TIME WE DECIDE
+    const busyTimeout = 1000 * 5; // WHATEVER REASONABLE TIME WE DECIDE
     const startBusyTime = Date.now();
     do {
       await this.page.waitForTimeout(50);
@@ -181,6 +181,7 @@ export class PlayWrightExecutor {
 
   private waitForTimeout = async (waitTime: number) => {
     try {
+      // console.log("Waiting for timeout");
       await this.page.waitForTimeout(waitTime);
     } catch (err) {
       console.error("ERROR: waitForTimeout: ", err.message);
@@ -201,6 +202,7 @@ export class PlayWrightExecutor {
     try {
       let element;
       selector = this.curateSelector(selector);
+      console.log(`mouseDown selector: ${selector}`);
       element = await this.page.$(selector);
       const box = await element.boundingBox();
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -234,6 +236,7 @@ export class PlayWrightExecutor {
     try {
       selector = this.curateSelector(selector);
       await this.page.press(selector, key);
+      await this.waitForTimeout(1000);
     } catch (err) {
       console.error("ERROR: pressKey: ", err.message);
       throw err;
@@ -254,10 +257,12 @@ export class PlayWrightExecutor {
   private click = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
+      console.log(`click: selector: ${selector}`);
       const element = await this.page.$(selector);
       await element.click({
         force: true,
       });
+      // await this.waitForTimeout(1000);
       console.log("element clicked");
     } catch (err) {
       console.error("ERROR: click: ", err.message);
@@ -269,6 +274,7 @@ export class PlayWrightExecutor {
     try {
       let screenshotPath = this.getScreenshotPath(testName);
       await this.checkIfPageIsBusy();
+      // await this.waitForTimeout(2000);
       await this.page.screenshot({
         path: screenshotPath,
       });
@@ -286,6 +292,7 @@ export class PlayWrightExecutor {
         let screenshotPath = this.getScreenshotPath(testName);
 
         await this.checkIfPageIsBusy();
+        // await this.waitForTimeout(2000);
         await element.screenshot({
           path: screenshotPath,
         });
@@ -307,6 +314,8 @@ export class PlayWrightExecutor {
       await element.hover({
         force: true,
       });
+      // await this.waitForTimeout(1000);
+      // await this.waitForTimeout(10000);
     } catch (err) {
       console.error("ERROR: HOVER: ", err.message);
       throw err;
@@ -335,6 +344,8 @@ export class PlayWrightExecutor {
 
   private done = async () => {
     try {
+      console.log("done() called")
+      // await this.waitForTimeout(5000);
       await this.page.close();
     } catch (err) {
       console.error("ERROR: completed steps: ", err.message);

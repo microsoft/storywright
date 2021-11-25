@@ -7,23 +7,27 @@ import { StepType } from "./StepTypes";
  */
 export class BrowserExecutor {
   public static async executesteps(steps: any[]) {
+    console.log(`steps: ${JSON.stringify(steps)}`);
     if (steps === null || steps === undefined || steps.length == 0) {
-      console.log(`Steps object is ${steps}`);
+      // console.log(`Steps object is ${steps}`);
       await TestExecutorActions.makeScreenshot();
       await TestExecutorActions.done();
       return;
     }
     for (const step of steps) {
-      const testName = step.name;
+      // const testName = step.name;
+      await TestExecutorActions.waitForTimeout(700);
       switch (step["type"]) {
         case StepType.SaveScreenshot: {
-          await TestExecutorActions.makeScreenshot(testName);
+          console.log(`ftestname: ${step.name}`);
+          await TestExecutorActions.makeScreenshot(step.name);
           break;
         }
         case StepType.CropScreenshot: {
+          console.log(`etestname: ${step.name}`);
           await TestExecutorActions.elementScreenshot(
             step.locator.value,
-            testName
+            step.name
           );
           break;
         }

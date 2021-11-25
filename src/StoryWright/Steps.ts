@@ -31,6 +31,7 @@ export class Steps {
   }
 
   public end() {
+    // console.log(`steps: ${JSON.stringify(this.steps)}`);
     return this.steps;
   }
 
