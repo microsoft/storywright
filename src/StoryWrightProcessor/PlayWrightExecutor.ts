@@ -156,7 +156,7 @@ export class PlayWrightExecutor {
     const busyTimeout = 1000; // WHATEVER REASONABLE TIME WE DECIDE
     const startBusyTime = Date.now();
     do {
-      await this.page.waitForTimeout(50);
+      await this.page.waitForTimeout(1000);
       busyTime = Date.now() - startBusyTime;
     } while (busyTime < busyTimeout && (await this.isPageBusy()));
   } 
