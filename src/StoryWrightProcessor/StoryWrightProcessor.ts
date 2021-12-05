@@ -86,7 +86,7 @@ export class StoryWrightProcessor {
                       /* Hide caret */
                       * { caret-color: transparent !important; }
                       /* Instant transitions and animations */
-                      * > * { transition-duration: 0.0001ms !important; animation-duration: 0ms !important; }
+                      * > * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
                     `;
                     document.head.appendChild(style);
                   });
