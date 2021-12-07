@@ -6,7 +6,9 @@ import { sep } from "path";
  */
 export class PlayWrightExecutor {
   private fileSuffix: number = 0;
-  private isPageBusy;
+
+  //Marking in public temporarily just to avoid tsc compilation error
+  public isPageBusy;
 
   constructor(
     private page: Page,
@@ -151,14 +153,16 @@ export class PlayWrightExecutor {
   };
 
   private async checkIfPageIsBusy() {
-    // Wait while the page is busy before screenshot'ing the story
-    let busyTime = 0;
-    const busyTimeout = 1000; // WHATEVER REASONABLE TIME WE DECIDE
-    const startBusyTime = Date.now();
+    // Check if 2 consecutive frames are equal.
+    // For now removing checkispagebusy as that is causing issues. Will investigate and add that later.
+    let prevBuf:Buffer;
+    let buf:Buffer = await this.page.screenshot();
+    const timeout = Date.now() + 4000; // WHATEVER REASONABLE TIME WE DECIDE
     do {
-      await this.page.waitForTimeout(1000);
-      busyTime = Date.now() - startBusyTime;
-    } while (busyTime < busyTimeout && (await this.isPageBusy()));
+      prevBuf = buf;
+      await this.page.waitForTimeout(100);
+      buf = await this.page.screenshot();
+    } while ( !(buf.equals(prevBuf)) && Date.now() < timeout);
   } 
 
   public async exposeFunctions() {
