@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { Page, Frame } from "playwright";
+import { Page } from "playwright";
 import { sep } from "path";
 /**
  * Class containing playwright exposed functions.
@@ -26,14 +26,6 @@ export class PlayWrightExecutor {
       mutatedDom: 0,
     };
   
-    this.page.on("framenavigated", (frame: Frame) => {
-      if (!frame.parentFrame()) {
-        busy.pendingPromises = 0;
-        busy.pendingTimeouts = 0;
-        busy.networkOrCpu = 0;
-        busy.mutatedDom = 0;
-      }
-    });
   
     await this.page.exposeFunction("__pwBusy__", (key: string) => {
       if (key === "promises++") {
@@ -51,85 +43,28 @@ export class PlayWrightExecutor {
       }
     });
   
-    this.page.addInitScript(`{
-        const _promiseConstructor = window.Promise.constructor;
-        const _timeoutIds = new Set();
-        const _setTimeout = window.setTimeout;
-        const _clearTimeout = window.clearTimeout;
-  
-        new MutationObserver(() => {
-          window.__pwBusy__("dom++");
-          requestAnimationFrame(() => { window.__pwBusy__("dom--"); });
-        }).observe(document, { attributes: true, childList: true, subtree: true });
-  
-        // Patch Promise constructor
-        window.Promise.constructor = async (resolve, reject) => {
-          window.__pwBusy__("promises++");
-  
-          const res = resolve && (async () => {
-            let val;
-            try {
-              val = await resolve();
-            } catch(err) {
-              throw err;
-            } finally {
-              window.__pwBusy__("promises--");
-            }
-            return val;
-          });
-  
-          const rej = reject && (async () => {
-            let val;
-            try {
-              val = await reject();
-            } catch(err) {
-              throw err;
-            } finally {
-              window.__pwBusy__("promises--");
-            }
-            return val;
-          });
-  
-          return _promiseConstructor.call(this, res, rej);
-        };
-  
-        // Path window.clearTimeout
-        window.clearTimeout = (id) => {
-          _clearTimeout(id);
-          if (_timeoutIds.has(id)) {
-            _timeoutIds.delete(id);
-            window.__pwBusy__("timeouts--");
-          }
-        };
-        // Patch window.setTimeout in the near future
-        window.setTimeout = (...args) => {
-          const ms = args[1];
-          const isInNearFuture = ms < 1000 * 5;
-          if (isInNearFuture) {
-            window.__pwBusy__("timeouts++");
-            const fn = args[0];
-            if (typeof(fn) === "function") {
-              args[0]  = () => {
-                try {
-                  fn();
-                } catch(err) {
-                } finally {
-                  window.__pwBusy__("timeouts--");
-                }
-              };
-            } else {
-              args[0]  = "try{" + args[0] + "; }catch(err){};window.__pwBusy__('timeouts--');";
-            }
-          }
-  
-          const timeoutId = _setTimeout.apply(this, args);
-  
-          if (isInNearFuture) {
-            _timeoutIds.add(timeoutId);
-          }
-  
-          return timeoutId;
-        };
+    await this.page.addInitScript(`{
+      const _setTimeout = window.setTimeout;
+      const _clearTimeout = window.clearTimeout;
+
+      window.clearTimeout = (id) => {
+        _clearTimeout(id);
+        window.__pwBusy__("timeouts--");
+      }
+
+      window.setTimeout = function(func, delay, params) {
+        window.__pwBusy__("timeouts++");
+        const timeoutId = _setTimeout(window.timeoutCallback, delay, [func, params]);
+        return timeoutId;
+      }
+    
+      window.timeoutCallback = function(funcAndParams) {
+        let func = funcAndParams[0];
+        let params = funcAndParams[1];
+        window.__pwBusy__("timeouts--");
+        func(params);
+      }
+      
     }`);
   
     return async (): Promise<boolean> => {
@@ -141,28 +76,45 @@ export class PlayWrightExecutor {
       })`);
       busy.networkOrCpu = Math.max(0, Date.now() - now - 3); // Allow a short delay due to node/browser bridge
   
+      //Temporarity remove network and other checks
       const isBusy =
-        busy.networkOrCpu +
-          busy.mutatedDom +
-          busy.pendingPromises +
           busy.pendingTimeouts >
         0;
-  
+
+      // Busy pending timeout is not expected so log it.
+      if(busy.pendingTimeouts<0)
+      {
+        console.log(`ERRR : Pending timeouts less than 0 ${busy.pendingTimeouts}`);
+      }
       return isBusy;
     };
   };
 
-  private async checkIfPageIsBusy() {
+  private async checkIfPageIsBusy(screenshotPath:string) {
     // Check if 2 consecutive frames are equal.
     // For now removing checkispagebusy as that is causing issues. Will investigate and add that later.
     let prevBuf:Buffer;
     let buf:Buffer = await this.page.screenshot();
     const timeout = Date.now() + 4000; // WHATEVER REASONABLE TIME WE DECIDE
+    let isBuffEqual: boolean;
+    let isBusy: boolean;
     do {
       prevBuf = buf;
       await this.page.waitForTimeout(100);
       buf = await this.page.screenshot();
-    } while ( !(buf.equals(prevBuf)) && Date.now() < timeout);
+      isBuffEqual = buf.equals(prevBuf);
+      isBusy = await this.isPageBusy();
+    } while ((!isBuffEqual || isBusy) && Date.now() < timeout);
+
+    // In case the above loop existed due to timeout them log the reason for debugging purpose.
+    if(!isBuffEqual)
+    {
+      console.log(`E222 : Buffers not equal for ${this.page.url()} Path = ${screenshotPath}`)
+    }
+    if(isBusy)
+    {
+      console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
+    }
   } 
 
   public async exposeFunctions() {
@@ -272,7 +224,7 @@ export class PlayWrightExecutor {
   private makeScreenshot = async (testName?: string) => {
     try {
       let screenshotPath = this.getScreenshotPath(testName);
-      await this.checkIfPageIsBusy();
+      await this.checkIfPageIsBusy(screenshotPath);
       await this.page.screenshot({
         path: screenshotPath,
       });
@@ -289,7 +241,7 @@ export class PlayWrightExecutor {
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
 
-        await this.checkIfPageIsBusy();
+        await this.checkIfPageIsBusy(screenshotPath);
         await element.screenshot({
           path: screenshotPath,
         });
