@@ -26,16 +26,22 @@ export class PlayWrightExecutor {
       mutatedDom: 0,
     };
   
+    // Mainting set here instead in page initscript becuase its easy to debug and view logs here
+    const timeoutIdSet = new Set();
   
-    await this.page.exposeFunction("__pwBusy__", (key: string) => {
+    await this.page.exposeFunction("__pwBusy__", (key: string, timeoutId: number) => {
       if (key === "promises++") {
         busy.pendingPromises++;
       } else if (key === "promises--") {
         busy.pendingPromises--;
       } else if (key === "timeouts++") {
+        timeoutIdSet.add(timeoutId);
         busy.pendingTimeouts++;
       } else if (key === "timeouts--") {
-        busy.pendingTimeouts--;
+        if (timeoutIdSet.has(timeoutId)) {
+          timeoutIdSet.delete(timeoutId);
+          busy.pendingTimeouts--;
+        }
       } else if (key === "dom++") {
         busy.mutatedDom++;
       } else if (key === "dom--") {
@@ -47,24 +53,21 @@ export class PlayWrightExecutor {
       const _setTimeout = window.setTimeout;
       const _clearTimeout = window.clearTimeout;
 
-      window.clearTimeout = (id) => {
-        _clearTimeout(id);
-        window.__pwBusy__("timeouts--");
+      window.clearTimeout = (timeoutId) => {
+        _clearTimeout(timeoutId);
+        window.__pwBusy__("timeouts--",timeoutId);
       }
 
-      window.setTimeout = function(func, delay, params) {
-        window.__pwBusy__("timeouts++");
-        const timeoutId = _setTimeout(window.timeoutCallback, delay, [func, params]);
+      window.setTimeout = function(fn, delay, params) {
+        var timeoutId = _setTimeout(function() {
+          fn && fn(params);
+          window.__pwBusy__("timeouts--",timeoutId);
+        }, delay);
+
+        window.__pwBusy__("timeouts++",timeoutId);
         return timeoutId;
       }
-    
-      window.timeoutCallback = function(funcAndParams) {
-        let func = funcAndParams[0];
-        let params = funcAndParams[1];
-        window.__pwBusy__("timeouts--");
-        func(params);
-      }
-      
+
     }`);
   
     return async (): Promise<boolean> => {
