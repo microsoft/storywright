@@ -59,8 +59,6 @@ export class PlayWrightExecutor {
       }
 
       window.setTimeout = function(fn, delay, params) {
-        alert(params);
-
         var timeoutId = _setTimeout(function() {
           window.__pwBusy__("timeouts--",timeoutId);
             fn && fn(params); 
