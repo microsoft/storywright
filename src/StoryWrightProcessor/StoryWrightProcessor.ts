@@ -79,7 +79,7 @@ export class StoryWrightProcessor {
                 });
 
                 // Add basic CSS normalization
-                page.addInitScript(() => {
+                await page.addInitScript(() => {
                   document.addEventListener("DOMContentLoaded", () => {
                     const style = document.createElement("style");
                     style.textContent = `
