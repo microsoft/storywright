@@ -59,7 +59,7 @@ export class PlayWrightExecutor {
       }
 
       window.setTimeout = function(fn, delay, params) {
-        // If there too much delay then we ignore it.
+        // If there too much delay then we ignore it as our process will close even before that.
         if(delay>7000)
         {
           return;
