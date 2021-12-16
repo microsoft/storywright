@@ -59,20 +59,16 @@ export class PlayWrightExecutor {
       }
 
       window.setTimeout = function(fn, delay, params) {
-        // If there too much delay then we reduce it.
-        if(delay>3000)
-        {
-          delay=3000;
-        }
+        const isInNearFuture = delay < 1000 * 7;
         var timeoutId = _setTimeout(function() {
           fn && fn(params);
           window.__pwBusy__("timeouts--",timeoutId);
         }, delay);
-
-        window.__pwBusy__("timeouts++",timeoutId);
+        if (isInNearFuture) {
+          window.__pwBusy__("timeouts++",timeoutId);
+        }
         return timeoutId;
       }
-
     }`);
   
     return async (): Promise<boolean> => {
@@ -103,12 +99,12 @@ export class PlayWrightExecutor {
     // For now removing checkispagebusy as that is causing issues. Will investigate and add that later.
     let prevBuf:Buffer;
     let buf:Buffer = await this.page.screenshot();
-    const timeout = Date.now() + 5000; // WHATEVER REASONABLE TIME WE DECIDE
+    const timeout = Date.now() + 8000; // WHATEVER REASONABLE TIME WE DECIDE
     let isBuffEqual: boolean;
     let isBusy: boolean;
     do {
       prevBuf = buf;
-      await this.page.waitForTimeout(100);
+      await this.page.waitForTimeout(300);
       buf = await this.page.screenshot();
       isBuffEqual = buf.equals(prevBuf);
       isBusy = await this.isPageBusy();
