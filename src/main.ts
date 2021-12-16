@@ -4,6 +4,8 @@ import { BrowserName } from "./StoryWrightProcessor/Constants";
 import { StoryWrightOptions } from "./StoryWrightProcessor/StoryWrightOptions";
 import { StoryWrightProcessor } from "./StoryWrightProcessor/StoryWrightProcessor";
 import { resolve } from "path";
+import {cpus} from "os";
+
 const args = argv
   .usage("Usage: $0 [options]")
   .help("h")
@@ -90,6 +92,7 @@ console.log(`Screenshot destination path = ${args.destpath}`);
 console.log(`Browsers = ${args.browsers}`);
 console.log(`Headless = ${args.headless}`);
 console.log(`Concurrency = ${args.concurrency}`);
+console.log(`Cores available on system  = ${cpus().length}`);
 console.log(`SkipSteps = ${args.skipSteps}`);
 console.log(
   `================ Starting story right execution =================`
