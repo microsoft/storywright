@@ -61,8 +61,8 @@ export class PlayWrightExecutor {
       window.setTimeout = function(fn, delay, params) {
         const isInNearFuture = delay < 1000 * 7;
         var timeoutId = _setTimeout(function() {
+          fn && fn(params);
           window.__pwBusy__("timeouts--",timeoutId);
-          fn && fn(params); 
         }, delay);
         if (isInNearFuture) {
           window.__pwBusy__("timeouts++",timeoutId);
