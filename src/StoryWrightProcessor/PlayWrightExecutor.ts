@@ -59,20 +59,16 @@ export class PlayWrightExecutor {
       }
 
       window.setTimeout = function(fn, delay, params) {
-        // If there too much delay then we ignore it as our process will close even before that.
-        if(delay>7000)
-        {
-          return;
-        }
+        const isInNearFuture = delay < 1000 * 7;
         var timeoutId = _setTimeout(function() {
-          fn && fn(params);
           window.__pwBusy__("timeouts--",timeoutId);
+          fn && fn(params); 
         }, delay);
-
-        window.__pwBusy__("timeouts++",timeoutId);
+        if (isInNearFuture) {
+          window.__pwBusy__("timeouts++",timeoutId);
+        }
         return timeoutId;
       }
-
     }`);
   
     return async (): Promise<boolean> => {
