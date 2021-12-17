@@ -60,7 +60,7 @@ export class PlayWrightExecutor {
 
       window.setTimeout = async function(fn, delay, params) {
         const isInNearFuture = delay < 1000 * 7;
-        var timeoutId = _setTimeout(function() {
+        var timeoutId = _setTimeout(async function() {
           try {
             fn && fn(params);
           }
