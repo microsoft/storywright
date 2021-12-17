@@ -25,10 +25,10 @@ export class PlayWrightExecutor {
       networkOrCpu: 0,
       mutatedDom: 0,
     };
-  
+
     // Mainting set here instead in page initscript becuase its easy to debug and view logs here
     const timeoutIdSet = new Set();
-  
+
     await this.page.exposeFunction("__pwBusy__", (key: string, timeoutId: number) => {
       if (key === "promises++") {
         busy.pendingPromises++;
@@ -48,7 +48,7 @@ export class PlayWrightExecutor {
         busy.mutatedDom--;
       }
     });
-  
+
     await this.page.addInitScript(`{
       const _setTimeout = window.setTimeout;
       const _clearTimeout = window.clearTimeout;
@@ -74,7 +74,7 @@ export class PlayWrightExecutor {
         return timeoutId;
       }
     }`);
-  
+
     return async (): Promise<boolean> => {
       // Check if the network or CPU are idle
       const now = Date.now();
@@ -83,26 +83,25 @@ export class PlayWrightExecutor {
         window.requestIdleCallback(() => { resolve(); });
       })`);
       busy.networkOrCpu = Math.max(0, Date.now() - now - 3); // Allow a short delay due to node/browser bridge
-  
+
       //Temporarity remove network and other checks
       const isBusy =
-          busy.pendingTimeouts >
+        busy.pendingTimeouts >
         0;
 
       // Busy pending timeout is not expected so log it.
-      if(busy.pendingTimeouts<0)
-      {
+      if (busy.pendingTimeouts < 0) {
         console.log(`ERRR : Pending timeouts less than 0 ${busy.pendingTimeouts}`);
       }
       return isBusy;
     };
   };
 
-  private async checkIfPageIsBusy(screenshotPath:string) {
+  private async checkIfPageIsBusy(screenshotPath: string) {
     // Check if 2 consecutive frames are equal.
     // For now removing checkispagebusy as that is causing issues. Will investigate and add that later.
-    let prevBuf:Buffer;
-    let buf:Buffer = await this.page.screenshot();
+    let prevBuf: Buffer;
+    let buf: Buffer = await this.page.screenshot();
     const timeout = Date.now() + 8000; // WHATEVER REASONABLE TIME WE DECIDE
     let isBuffEqual: boolean;
     let isBusy: boolean;
@@ -115,18 +114,16 @@ export class PlayWrightExecutor {
     } while ((!isBuffEqual || isBusy) && Date.now() < timeout);
 
     // In case the above loop existed due to timeout them log the reason for debugging purpose.
-    if(!isBuffEqual)
-    {
+    if (!isBuffEqual) {
       console.log(`E222 : Buffers not equal for ${this.page.url()} Path = ${screenshotPath}`)
     }
-    if(isBusy)
-    {
+    if (isBusy) {
       console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
     }
-  } 
+  }
 
   public async exposeFunctions() {
-    this.isPageBusy = await this.getIsPageBusyMethod(); 
+    this.isPageBusy = await this.getIsPageBusyMethod();
     await this.page.exposeFunction("makeScreenshot", this.makeScreenshot);
     await this.page.exposeFunction("click", this.click);
     await this.page.exposeFunction("hover", this.hover);
@@ -197,7 +194,7 @@ export class PlayWrightExecutor {
   private pressKey = async (selector: string, key: string) => {
     try {
       selector = this.curateSelector(selector);
-      await this.page.press(selector, key);
+      await this.page.keyboard.press(key);
     } catch (err) {
       console.error("ERROR: pressKey: ", err.message);
       throw err;
@@ -329,32 +326,32 @@ export class PlayWrightExecutor {
   }
 
   // INFO: Removes non-ASCII characters
-  private removeNonASCIICharacters(name: string){
-    return name.replace(/[^\x00-\x7F]/g,"");
+  private removeNonASCIICharacters(name: string) {
+    return name.replace(/[^\x00-\x7F]/g, "");
   }
 
 
   /*  This will insert double quotes around selector string, if missing.
       Eg: buttonbutton[data-id=ex123][attr=ex432] will be changed to button[data-id="ex123"][attr="ex432"] 
   */
-  private curateSelector(selector: string){
+  private curateSelector(selector: string) {
     //No need to check if selector doesn't contain equals to (=)
-    if(selector.indexOf("=") == -1){
+    if (selector.indexOf("=") == -1) {
       return selector;
     }
 
     let newSelector = "";
-    newSelector = selector.substring(0, selector.indexOf("=")+1);
+    newSelector = selector.substring(0, selector.indexOf("=") + 1);
 
     //Loop through all attributes 
-    while(selector.indexOf("[") > -1 && selector.indexOf("=") > -1){
+    while (selector.indexOf("[") > -1 && selector.indexOf("=") > -1) {
       /*  Pulls out chars b/w equals to (=) and closing square bracket (])
           Eg: button[data-id=ex123] will give "ex123" to temp
       */
       let temp = selector.substring(selector.indexOf("=") + 1, selector.indexOf("]"));
 
       // Check if temp is not surrounded by either double/single quotes
-      if(!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')){
+      if (!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')) {
         temp = '"' + temp + '"';
       }
 
@@ -362,9 +359,9 @@ export class PlayWrightExecutor {
 
       // Move to the next chunk to curate 
       // Eg: If buttonbutton[data-id=ex123][attr=ex432] then move selector to [attr=432]
-      selector = selector.substring(selector.indexOf("]")+1, selector.length);
+      selector = selector.substring(selector.indexOf("]") + 1, selector.length);
     }
-    if(selector.length > 0){
+    if (selector.length > 0) {
       newSelector += selector;
     }
 

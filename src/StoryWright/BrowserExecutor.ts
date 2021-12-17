@@ -51,22 +51,28 @@ export class BrowserExecutor {
           break;
         }
         case StepType.SendKeys: {
-          let keyFound = false;
-
-          Object.keys(Keys).map((key) => {
-            if (Keys[key] == step.keys) {
-              keyFound = true;
-            }
-          });
+          // No key value mean focus.
           if (step.keys === "") {
             await TestExecutorActions.focus(step.locator.value);
-          } else if (!keyFound) {
-            await TestExecutorActions.setElementText(
-              step.locator.value,
-              step.keys
-            );
-          } else {
-            await TestExecutorActions.pressKey(step.locator.value, step.keys);
+          }
+          else {
+            let keyToSend;
+            for (const key of Object.keys(Keys)) {
+              if (Keys[key] == step.keys || key == step.keys) {
+                keyToSend = Keys[key];
+                break;
+              }
+            }
+            // If no key found means set text in textbox.
+            if (!keyToSend) {
+              await TestExecutorActions.setElementText(
+                step.locator.value,
+                step.keys
+              );
+            }
+            else {
+              await TestExecutorActions.pressKey(step.locator.value, keyToSend);
+            }
           }
           break;
         }
