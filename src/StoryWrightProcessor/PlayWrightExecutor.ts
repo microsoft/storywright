@@ -53,12 +53,12 @@ export class PlayWrightExecutor {
       const _setTimeout = window.setTimeout;
       const _clearTimeout = window.clearTimeout;
 
-      window.clearTimeout = (timeoutId) => {
+      window.clearTimeout = async (timeoutId) => {
         _clearTimeout(timeoutId);
         await window.__pwBusy__("timeouts--",timeoutId);
       }
 
-      window.setTimeout = function(fn, delay, params) {
+      window.setTimeout = async function(fn, delay, params) {
         const isInNearFuture = delay < 1000 * 7;
         var timeoutId = _setTimeout(function() {
           try {
