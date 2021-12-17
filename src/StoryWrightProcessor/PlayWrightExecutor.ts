@@ -55,7 +55,7 @@ export class PlayWrightExecutor {
 
       window.clearTimeout = (timeoutId) => {
         _clearTimeout(timeoutId);
-        window.__pwBusy__("timeouts--",timeoutId);
+        await window.__pwBusy__("timeouts--",timeoutId);
       }
 
       window.setTimeout = function(fn, delay, params) {
@@ -65,11 +65,11 @@ export class PlayWrightExecutor {
             fn && fn(params);
           }
           finally {
-            window.__pwBusy__("timeouts--",timeoutId);
+            await window.__pwBusy__("timeouts--",timeoutId);
           }
         }, delay);
         if (isInNearFuture) {
-          window.__pwBusy__("timeouts++",timeoutId);
+          await window.__pwBusy__("timeouts++",timeoutId);
         }
         return timeoutId;
       }
