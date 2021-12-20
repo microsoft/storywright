@@ -78,6 +78,7 @@ export class PlayWrightExecutor {
     return async (): Promise<boolean> => {
       // Check if the network or CPU are idle
       const now = Date.now();
+      await this.page.waitForLoadState("load");
       await this.page.waitForLoadState("networkidle");
       await this.page.evaluate(`new Promise(resolve => {
         window.requestIdleCallback(() => { resolve(); });
