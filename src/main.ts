@@ -71,6 +71,14 @@ const args = argv
     nargs: 1,
     type: "boolean",
   })
+  .option("waitTimeScreenshot", {
+    alias: "waitTimeScreenshot",
+    default: 1000,
+    describe:
+      "Time to wait before taking screenshot",
+    nargs: 1,
+    type: "number",
+  })
   .example(
     "$0",
     "Captures screenshot for all stories using default static storybook path dist/iframe.html"
@@ -94,6 +102,7 @@ console.log(`Headless = ${args.headless}`);
 console.log(`Concurrency = ${args.concurrency}`);
 console.log(`Cores available on system  = ${cpus().length}`);
 console.log(`SkipSteps = ${args.skipSteps}`);
+console.log(`WaitTimeScreenshot = ${args.waitTimeScreenshot}`);
 console.log(
   `================ Starting story right execution =================`
 );
@@ -107,6 +116,7 @@ const storyWrightOptions: StoryWrightOptions = {
   skipSteps: args.skipSteps,
   partitionIndex: args.partitionIndex,
   totalPartitions: args.totalPartitions,
+  waitTimeScreenshot: args.waitTimeScreenshot
 };
 
 StoryWrightProcessor.process(storyWrightOptions);

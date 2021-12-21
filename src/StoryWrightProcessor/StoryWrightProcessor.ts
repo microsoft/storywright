@@ -100,9 +100,9 @@ export class StoryWrightProcessor {
                   
                   const isPageBusy = await new PlayWrightExecutor(
                     page,
-                    options.screenShotDestPath,
                     ssNamePrefix,
-                    browserName
+                    browserName,
+                    options
                   ).getIsPageBusyMethod();                  
 
                   let busyTime = 0;
@@ -121,9 +121,9 @@ export class StoryWrightProcessor {
                 } else {
                   await new PlayWrightExecutor(
                     page,
-                    options.screenShotDestPath,
                     ssNamePrefix,
-                    browserName
+                    browserName, 
+                    options
                   ).exposeFunctions();
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
                   

@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import { Page } from "playwright";
 import { sep } from "path";
+import { StoryWrightOptions } from "./StoryWrightOptions";
 /**
  * Class containing playwright exposed functions.
  */
@@ -12,9 +13,9 @@ export class PlayWrightExecutor {
 
   constructor(
     private page: Page,
-    private path: string,
     private ssNamePrefix: string,
-    private browserName: string
+    private browserName: string,
+    private options: StoryWrightOptions
   ) {
   }
 
@@ -105,7 +106,7 @@ export class PlayWrightExecutor {
       // Add a default wait for 1sec for css rendring, click or hover activities. 
       // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
       // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(this.options.waitTimeScreenshot);
       isBusy = await this.isPageBusy();
     } while (isBusy && Date.now() < timeout);
 
@@ -301,9 +302,9 @@ export class PlayWrightExecutor {
 
     if (testName) {
       testName = testName.replace(/:/g, "-");
-      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
-      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`);
     }
 
     //INFO: Append file prefix if screenshot with same name exist.
