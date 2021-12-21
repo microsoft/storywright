@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "cwd": "C:\\GIT\\vrt",
+            "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}\\bin\\storywright.js",
             "args": ["--browsers","chromium","--concurrency","1","--destpath","baseline","--headless","true"],
             "preLaunchTask": "tsc: build - tsconfig.json",
