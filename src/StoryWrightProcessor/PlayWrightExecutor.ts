@@ -99,25 +99,13 @@ export class PlayWrightExecutor {
   };
 
   private async checkIfPageIsBusy(screenshotPath: string) {
-    // Check if 2 consecutive frames are equal.
-    // For now removing checkispagebusy as that is causing issues. Will investigate and add that later.
-    let prevBuf: Buffer;
-    let buf: Buffer = await this.page.screenshot();
     const timeout = Date.now() + 8000; // WHATEVER REASONABLE TIME WE DECIDE
-    let isBuffEqual: boolean;
     let isBusy: boolean;
     do {
-      prevBuf = buf;
-      await this.page.waitForTimeout(300);
-      buf = await this.page.screenshot();
-      isBuffEqual = buf.equals(prevBuf);
+      await this.page.waitForTimeout(1000);
       isBusy = await this.isPageBusy();
-    } while ((!isBuffEqual || isBusy) && Date.now() < timeout);
+    } while (isBusy && Date.now() < timeout);
 
-    // In case the above loop existed due to timeout them log the reason for debugging purpose.
-    if (!isBuffEqual) {
-      console.log(`E222 : Buffers not equal for ${this.page.url()} Path = ${screenshotPath}`)
-    }
     if (isBusy) {
       console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
     }
