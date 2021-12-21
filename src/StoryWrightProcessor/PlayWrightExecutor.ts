@@ -102,6 +102,9 @@ export class PlayWrightExecutor {
     const timeout = Date.now() + 8000; // WHATEVER REASONABLE TIME WE DECIDE
     let isBusy: boolean;
     do {
+      // Add a default wait for 1sec for css rendring, click or hover activities. 
+      // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
+      // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
       await this.page.waitForTimeout(1000);
       isBusy = await this.isPageBusy();
     } while (isBusy && Date.now() < timeout);
