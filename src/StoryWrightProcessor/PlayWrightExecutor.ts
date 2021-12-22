@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import { Page } from "playwright";
 import { sep } from "path";
+import { StoryWrightOptions } from "./StoryWrightOptions";
 /**
  * Class containing playwright exposed functions.
  */
@@ -12,9 +13,9 @@ export class PlayWrightExecutor {
 
   constructor(
     private page: Page,
-    private path: string,
     private ssNamePrefix: string,
-    private browserName: string
+    private browserName: string,
+    private options: StoryWrightOptions
   ) {
   }
 
@@ -99,25 +100,16 @@ export class PlayWrightExecutor {
   };
 
   private async checkIfPageIsBusy(screenshotPath: string) {
-    // Check if 2 consecutive frames are equal.
-    // For now removing checkispagebusy as that is causing issues. Will investigate and add that later.
-    let prevBuf: Buffer;
-    let buf: Buffer = await this.page.screenshot();
     const timeout = Date.now() + 8000; // WHATEVER REASONABLE TIME WE DECIDE
-    let isBuffEqual: boolean;
     let isBusy: boolean;
     do {
-      prevBuf = buf;
-      await this.page.waitForTimeout(300);
-      buf = await this.page.screenshot();
-      isBuffEqual = buf.equals(prevBuf);
+      // Add a default wait for 1sec for css rendring, click or hover activities. 
+      // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
+      // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
+      await this.page.waitForTimeout(this.options.waitTimeScreenshot);
       isBusy = await this.isPageBusy();
-    } while ((!isBuffEqual || isBusy) && Date.now() < timeout);
+    } while (isBusy && Date.now() < timeout);
 
-    // In case the above loop existed due to timeout them log the reason for debugging purpose.
-    if (!isBuffEqual) {
-      console.log(`E222 : Buffers not equal for ${this.page.url()} Path = ${screenshotPath}`)
-    }
     if (isBusy) {
       console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
     }
@@ -310,9 +302,9 @@ export class PlayWrightExecutor {
 
     if (testName) {
       testName = testName.replace(/:/g, "-");
-      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
-      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`);
     }
 
     //INFO: Append file prefix if screenshot with same name exist.

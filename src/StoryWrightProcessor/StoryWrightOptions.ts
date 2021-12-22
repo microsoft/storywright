@@ -10,4 +10,5 @@ export interface StoryWrightOptions {
   skipSteps: boolean;
   partitionIndex: number;
   totalPartitions: number;
+  waitTimeScreenshot: number;
 }
