@@ -33,6 +33,8 @@ export class BrowserExecutor {
         }
         case StepType.ClickElement: {
           await TestExecutorActions.click(step.locator.value);
+          // Wait for 100ms for click to finish
+          await new Promise(resolve => setTimeout(resolve, 100));
           break;
         }
         case StepType.WaitForElementNotPresent: {
@@ -41,6 +43,8 @@ export class BrowserExecutor {
         }
         case StepType.MoveTo: {
           await TestExecutorActions.hover(step.locator.value);
+          // Wait for 100ms for hover to finish
+          await new Promise(resolve => setTimeout(resolve, 100));
           break;
         }
         case StepType.SetElementText: {
@@ -82,10 +86,14 @@ export class BrowserExecutor {
         }
         case StepType.ClickAndHoldElement: {
           await TestExecutorActions.mouseDown(step.locator.value);
+          // Wait for 100ms for action to finish
+          await new Promise(resolve => setTimeout(resolve, 100));
           break;
         }
         case StepType.ReleaseElement: {
           await TestExecutorActions.mouseUp();
+          // Wait for 100ms for action to finish
+          await new Promise(resolve => setTimeout(resolve, 100));
           break;
         }
         case StepType.WaitForTimeout: {
