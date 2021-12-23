@@ -80,7 +80,7 @@ export class PlayWrightExecutor {
       // Check if the network or CPU are idle
       const now = Date.now();
       await this.page.waitForLoadState("load");
-      await this.page.waitForLoadState("networkidle");
+      
       await this.page.evaluate(`new Promise(resolve => {
         window.requestIdleCallback(() => { resolve(); });
       })`);
@@ -106,7 +106,11 @@ export class PlayWrightExecutor {
       // Add a default wait for 1sec for css rendring, click or hover activities. 
       // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
       // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
+      console.log("Before "+Date.now());
+      await this.page.waitForLoadState("networkidle");
+      
       await this.page.waitForTimeout(this.options.waitTimeScreenshot);
+      console.log("After "+Date.now());
       isBusy = await this.isPageBusy();
     } while (isBusy && Date.now() < timeout);
 
@@ -226,6 +230,7 @@ export class PlayWrightExecutor {
       await this.page.screenshot({
         path: screenshotPath,
       });
+      await this.domShot(screenshotPath);
     } catch (err) {
       console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
       throw err;
@@ -243,6 +248,7 @@ export class PlayWrightExecutor {
         await element.screenshot({
           path: screenshotPath,
         });
+        await this.domShot(screenshotPath);
       } else {
         console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
         await this.makeScreenshot(testName);
@@ -253,6 +259,30 @@ export class PlayWrightExecutor {
       await this.makeScreenshot(testName);
     }
   };
+
+  private domShot = async (path: string) => {
+    let op = await this.page.evaluate(() => {
+
+      function htmlToJson(div) {
+        var tag = {};
+        tag['tagName'] = div.tagName;
+        tag['children'] = [];
+        for (var i = 0; i < div.children.length; i++) {
+          tag['children'].push(htmlToJson(div.children[i]));
+        }
+        for (var i = 0; i < div.attributes.length; i++) {
+          var attr = div.attributes[i];
+          tag['@' + attr.name] = attr.value;
+        }
+        tag['computeds'] = window.getComputedStyle(div);
+        return tag;
+      }
+
+      return htmlToJson(document.getElementById("root"));
+    });
+
+    fs.writeFileSync(`${path}.dom.txt`,JSON.stringify(op));
+  }
 
   private hover = async (selector: string) => {
     try {

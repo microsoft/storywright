@@ -68,6 +68,10 @@ export class StoryWrightProcessor {
               
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
+              if(!ssNamePrefix.includes("CustomSortDialog"))
+              {
+                return;
+              }
               let page: Page;
               try {
                 page = await context.newPage();
@@ -125,7 +129,7 @@ export class StoryWrightProcessor {
                     browserName, 
                     options
                   ).exposeFunctions();
-                  await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  await page.goto(join(options.url, `iframe.html?id=${id}`),{waitUntil:"networkidle"});
                   
                   // Add style to make cursor transparent from input fields
                  
