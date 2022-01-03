@@ -213,6 +213,7 @@ export class PlayWrightExecutor {
         force: true,
       });
       console.log("element clicked");
+      // Consecutive clicks or hover create timing issue hence adding small delay.
       await this.page.waitForTimeout(100);
     } catch (err) {
       console.error("ERROR: click: ", err.message);
@@ -262,6 +263,7 @@ export class PlayWrightExecutor {
       await element.hover({
         force: true,
       });
+      // Consecutive clicks or hover create timing issue hence adding small delay.
       await this.page.waitForTimeout(100);
     } catch (err) {
       console.error("ERROR: HOVER: ", err.message);
