@@ -213,6 +213,7 @@ export class PlayWrightExecutor {
         force: true,
       });
       console.log("element clicked");
+      await this.page.waitForTimeout(100);
     } catch (err) {
       console.error("ERROR: click: ", err.message);
       throw err;
@@ -261,6 +262,7 @@ export class PlayWrightExecutor {
       await element.hover({
         force: true,
       });
+      await this.page.waitForTimeout(100);
     } catch (err) {
       console.error("ERROR: HOVER: ", err.message);
       throw err;
