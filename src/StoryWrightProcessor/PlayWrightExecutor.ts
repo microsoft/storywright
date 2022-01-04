@@ -5,6 +5,14 @@ import { StoryWrightOptions } from "./StoryWrightOptions";
 /**
  * Class containing playwright exposed functions.
  */
+class Busy {
+  constructor(
+    public pendingTimeouts: number,
+    public pendingNetworkMap: Map<string, number>
+  ) {
+  }
+}
+
 export class PlayWrightExecutor {
   private fileSuffix: number = 0;
 
@@ -20,22 +28,36 @@ export class PlayWrightExecutor {
   }
 
   public async getIsPageBusyMethod() {
-    const busy = {
-      pendingPromises: 0,
-      pendingTimeouts: 0,
-      networkOrCpu: 0,
-      mutatedDom: 0,
-    };
+    
+    const busy = new Busy(0, new Map<string, number>());
+
+    this.page.on('request', (request) => {
+      const url = request.url();
+      const networkCount = busy.pendingNetworkMap.get(url);
+      if (!networkCount || networkCount === 0) {
+        busy.pendingNetworkMap.set(url, 1);
+      }
+      else {
+        busy.pendingNetworkMap.set(url, networkCount + 1);
+      }
+    });
+
+    this.page.on('response', (response) => {
+      const url = response.url();
+      const networkCount = busy.pendingNetworkMap.get(url);
+      if (networkCount <= 1) {
+        busy.pendingNetworkMap.delete(url);
+      }
+      else {
+        busy.pendingNetworkMap.set(url, networkCount - 1);
+      }
+    });
 
     // Mainting set here instead in page initscript becuase its easy to debug and view logs here
     const timeoutIdSet = new Set();
 
     await this.page.exposeFunction("__pwBusy__", (key: string, timeoutId: number) => {
-      if (key === "promises++") {
-        busy.pendingPromises++;
-      } else if (key === "promises--") {
-        busy.pendingPromises--;
-      } else if (key === "timeouts++") {
+      if (key === "timeouts++") {
         timeoutIdSet.add(timeoutId);
         busy.pendingTimeouts++;
       } else if (key === "timeouts--") {
@@ -43,10 +65,6 @@ export class PlayWrightExecutor {
           timeoutIdSet.delete(timeoutId);
           busy.pendingTimeouts--;
         }
-      } else if (key === "dom++") {
-        busy.mutatedDom++;
-      } else if (key === "dom--") {
-        busy.mutatedDom--;
       }
     });
 
@@ -76,42 +94,47 @@ export class PlayWrightExecutor {
       }
     }`);
 
-    return async (): Promise<boolean> => {
+    return async (): Promise<Object> => {
       // Check if the network or CPU are idle
-      const now = Date.now();
       await this.page.waitForLoadState("load");
       await this.page.waitForLoadState("networkidle");
       await this.page.evaluate(`new Promise(resolve => {
         window.requestIdleCallback(() => { resolve(); });
       })`);
-      busy.networkOrCpu = Math.max(0, Date.now() - now - 3); // Allow a short delay due to node/browser bridge
-
-      //Temporarity remove network and other checks
-      const isBusy =
-        busy.pendingTimeouts >
-        0;
 
       // Busy pending timeout is not expected so log it.
       if (busy.pendingTimeouts < 0) {
         console.log(`ERRR : Pending timeouts less than 0 ${busy.pendingTimeouts}`);
       }
-      return isBusy;
+      return busy;
     };
   };
 
+  
+
   private async checkIfPageIsBusy(screenshotPath: string) {
-    const timeout = Date.now() + 8000; // WHATEVER REASONABLE TIME WE DECIDE
+    const timeout = Date.now() + 10000; // WHATEVER REASONABLE TIME WE DECIDE
     let isBusy: boolean;
+    let busy:Busy;
     do {
       // Add a default wait for 1sec for css rendring, click or hover activities. 
       // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
       // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
       await this.page.waitForTimeout(this.options.waitTimeScreenshot);
-      isBusy = await this.isPageBusy();
+      busy = await this.isPageBusy();
+      isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size > 0;
     } while (isBusy && Date.now() < timeout);
 
     if (isBusy) {
-      console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
+      if (busy.pendingTimeouts > 0) {
+        console.log(`E2223 : Page busy. Pending timeouts for ${this.page.url()} Path = ${screenshotPath}`);
+      }
+      else if (busy.pendingNetworkMap.size > 0) {
+        console.log(`E2223 : Page busy. Pending network for ${this.page.url()} Path = ${screenshotPath} PendingUrls = ${JSON.stringify(Array.from(busy.pendingNetworkMap))}`);
+      }
+      else {
+        console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
+      }
     }
   }
 
