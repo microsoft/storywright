@@ -30,7 +30,7 @@ export class PlayWrightExecutor {
   public async getIsPageBusyMethod() {
     
     const busy = new Busy(0, new Map<string, number>());
-
+    
     this.page.on('request', (request) => {
       const url = request.url();
       const networkCount = busy.pendingNetworkMap.get(url);
@@ -94,7 +94,7 @@ export class PlayWrightExecutor {
       }
     }`);
 
-    return async (): Promise<Object> => {
+    return async (): Promise<Busy> => {
       // Check if the network or CPU are idle
       await this.page.waitForLoadState("load");
       await this.page.waitForLoadState("networkidle");
