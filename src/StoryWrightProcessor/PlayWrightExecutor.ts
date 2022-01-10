@@ -8,7 +8,8 @@ import { StoryWrightOptions } from "./StoryWrightOptions";
 class Busy {
   constructor(
     public pendingTimeouts: number,
-    public pendingNetworkMap: Map<string, number>
+    public pendingNetworkMap: Map<string, number>,
+    public pendingDom: number
   ) {
   }
 }
@@ -29,7 +30,7 @@ export class PlayWrightExecutor {
 
   public async getIsPageBusyMethod() {
     
-    const busy = new Busy(0, new Map<string, number>());
+    const busy = new Busy(0, new Map<string, number>(), 0);
     
     this.page.on('request', (request) => {
       const url = request.url();
@@ -65,6 +66,10 @@ export class PlayWrightExecutor {
           timeoutIdSet.delete(timeoutId);
           busy.pendingTimeouts--;
         }
+      } else if (key === "dom++") {
+        busy.pendingDom++;
+      } else if (key === "dom--") {
+        busy.pendingDom--;
       }
     });
 
@@ -92,6 +97,12 @@ export class PlayWrightExecutor {
         }
         return timeoutId;
       }
+
+      new MutationObserver(() => {
+        window.__pwBusy__("dom++");
+        requestAnimationFrame(() => { window.__pwBusy__("dom--"); });
+      }).observe(document, { attributes: true, childList: true, subtree: true });
+
     }`);
 
     return async (): Promise<Busy> => {
@@ -122,7 +133,7 @@ export class PlayWrightExecutor {
       // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
       await this.page.waitForTimeout(this.options.waitTimeScreenshot);
       busy = await this.isPageBusy();
-      isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size > 0;
+      isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size + busy.pendingDom> 0;
     } while (isBusy && Date.now() < timeout);
 
     if (isBusy) {
@@ -131,6 +142,9 @@ export class PlayWrightExecutor {
       }
       else if (busy.pendingNetworkMap.size > 0) {
         console.log(`E2223 : Page busy. Pending network for ${this.page.url()} Path = ${screenshotPath} PendingUrls = ${JSON.stringify(Array.from(busy.pendingNetworkMap))}`);
+      }
+      else if (busy.pendingDom > 0) {
+        console.log(`E2223 : Page busy. Pending dom for ${this.page.url()} Path = ${screenshotPath}`);
       }
       else {
         console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
