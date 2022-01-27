@@ -251,15 +251,14 @@ export class PlayWrightExecutor {
         force: true,
       });
 
-      //This is a hacky fix for a very specific test scenario.
-      if(selector.includes("testButton"))
-      {
-        await this.page.waitForTimeout(6000);
-      }
-
-      console.log("element clicked");
       // Consecutive clicks or hover create timing issue hence adding small delay.
-      await this.page.waitForTimeout(100);
+      let delay = 100;
+      if (selector.includes("testButton")) {
+        //This is a hacky fix for a very specific test scenario.
+        delay = 6000;
+      }
+      console.log(`element ${selector} clicked`);
+      await this.page.waitForTimeout(delay);
     } catch (err) {
       console.error("ERROR: click: ", err.message);
       throw err;
