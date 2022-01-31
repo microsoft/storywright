@@ -79,14 +79,14 @@ export class StoryWrightProcessor {
                 });
 
                 // Add basic CSS normalization
-                page.addInitScript(() => {
+                await page.addInitScript(() => {
                   document.addEventListener("DOMContentLoaded", () => {
                     const style = document.createElement("style");
                     style.textContent = `
                       /* Hide caret */
                       * { caret-color: transparent !important; }
                       /* Instant transitions and animations */
-                      * > * { transition-duration: 0.0001ms !important; animation-duration: 0ms !important; }
+                      * > * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
                     `;
                     document.head.appendChild(style);
                   });
@@ -100,9 +100,9 @@ export class StoryWrightProcessor {
                   
                   const isPageBusy = await new PlayWrightExecutor(
                     page,
-                    options.screenShotDestPath,
                     ssNamePrefix,
-                    browserName
+                    browserName,
+                    options
                   ).getIsPageBusyMethod();                  
 
                   let busyTime = 0;
@@ -121,9 +121,9 @@ export class StoryWrightProcessor {
                 } else {
                   await new PlayWrightExecutor(
                     page,
-                    options.screenShotDestPath,
                     ssNamePrefix,
-                    browserName
+                    browserName, 
+                    options
                   ).exposeFunctions();
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
                   
@@ -131,8 +131,8 @@ export class StoryWrightProcessor {
                  
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
 
-                  // Wait for close event to be fired from steps. Default timeout is 30 seconds.
-                  await page.waitForEvent("close");
+                  // Wait for close event to be fired from steps. Wait for 1 min 30 seconds.
+                  await page.waitForEvent("close", { timeout: 90000 });
                 }
               } catch (err) {
                 console.log(

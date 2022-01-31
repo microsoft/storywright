@@ -4,6 +4,8 @@ import { BrowserName } from "./StoryWrightProcessor/Constants";
 import { StoryWrightOptions } from "./StoryWrightProcessor/StoryWrightOptions";
 import { StoryWrightProcessor } from "./StoryWrightProcessor/StoryWrightProcessor";
 import { resolve } from "path";
+import {cpus} from "os";
+
 const args = argv
   .usage("Usage: $0 [options]")
   .help("h")
@@ -69,6 +71,14 @@ const args = argv
     nargs: 1,
     type: "boolean",
   })
+  .option("waitTimeScreenshot", {
+    alias: "waitTimeScreenshot",
+    default: 1000,
+    describe:
+      "Time to wait before taking screenshot",
+    nargs: 1,
+    type: "number",
+  })
   .example(
     "$0",
     "Captures screenshot for all stories using default static storybook path dist/iframe.html"
@@ -90,7 +100,9 @@ console.log(`Screenshot destination path = ${args.destpath}`);
 console.log(`Browsers = ${args.browsers}`);
 console.log(`Headless = ${args.headless}`);
 console.log(`Concurrency = ${args.concurrency}`);
+console.log(`Cores available on system  = ${cpus().length}`);
 console.log(`SkipSteps = ${args.skipSteps}`);
+console.log(`WaitTimeScreenshot = ${args.waitTimeScreenshot}`);
 console.log(
   `================ Starting story right execution =================`
 );
@@ -104,6 +116,7 @@ const storyWrightOptions: StoryWrightOptions = {
   skipSteps: args.skipSteps,
   partitionIndex: args.partitionIndex,
   totalPartitions: args.totalPartitions,
+  waitTimeScreenshot: args.waitTimeScreenshot
 };
 
 StoryWrightProcessor.process(storyWrightOptions);

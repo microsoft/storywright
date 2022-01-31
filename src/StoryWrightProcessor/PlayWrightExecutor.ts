@@ -1,168 +1,159 @@
 import * as fs from "fs";
-import { Page, Frame } from "playwright";
+import { Page } from "playwright";
 import { sep } from "path";
+import { StoryWrightOptions } from "./StoryWrightOptions";
 /**
  * Class containing playwright exposed functions.
  */
+class Busy {
+  constructor(
+    public pendingTimeouts: number,
+    public pendingNetworkMap: Map<string, number>,
+    public pendingDom: number
+  ) {
+  }
+}
+
 export class PlayWrightExecutor {
   private fileSuffix: number = 0;
-  private isPageBusy;
+
+  //Marking in public temporarily just to avoid tsc compilation error
+  public isPageBusy;
 
   constructor(
     private page: Page,
-    private path: string,
     private ssNamePrefix: string,
-    private browserName: string
+    private browserName: string,
+    private options: StoryWrightOptions
   ) {
   }
 
   public async getIsPageBusyMethod() {
-    const busy = {
-      pendingPromises: 0,
-      pendingTimeouts: 0,
-      networkOrCpu: 0,
-      mutatedDom: 0,
-    };
-  
-    this.page.on("framenavigated", (frame: Frame) => {
-      if (!frame.parentFrame()) {
-        busy.pendingPromises = 0;
-        busy.pendingTimeouts = 0;
-        busy.networkOrCpu = 0;
-        busy.mutatedDom = 0;
+    
+    const busy = new Busy(0, new Map<string, number>(), 0);
+    
+    this.page.on('request', (request) => {
+      const url = request.url();
+      const networkCount = busy.pendingNetworkMap.get(url);
+      if (!networkCount || networkCount === 0) {
+        busy.pendingNetworkMap.set(url, 1);
+      }
+      else {
+        busy.pendingNetworkMap.set(url, networkCount + 1);
       }
     });
-  
-    await this.page.exposeFunction("__pwBusy__", (key: string) => {
-      if (key === "promises++") {
-        busy.pendingPromises++;
-      } else if (key === "promises--") {
-        busy.pendingPromises--;
-      } else if (key === "timeouts++") {
+
+    this.page.on('response', (response) => {
+      const url = response.url();
+      const networkCount = busy.pendingNetworkMap.get(url);
+      if (networkCount <= 1) {
+        busy.pendingNetworkMap.delete(url);
+      }
+      else {
+        busy.pendingNetworkMap.set(url, networkCount - 1);
+      }
+    });
+
+    // Mainting set here instead in page initscript becuase its easy to debug and view logs here
+    const timeoutIdSet = new Set();
+
+    await this.page.exposeFunction("__pwBusy__", (key: string, timeoutId: number) => {
+      if (key === "timeouts++") {
+        timeoutIdSet.add(timeoutId);
         busy.pendingTimeouts++;
       } else if (key === "timeouts--") {
-        busy.pendingTimeouts--;
+        if (timeoutIdSet.has(timeoutId)) {
+          timeoutIdSet.delete(timeoutId);
+          busy.pendingTimeouts--;
+        }
       } else if (key === "dom++") {
-        busy.mutatedDom++;
+        busy.pendingDom++;
       } else if (key === "dom--") {
-        busy.mutatedDom--;
+        busy.pendingDom--;
       }
     });
-  
-    this.page.addInitScript(`{
-        const _promiseConstructor = window.Promise.constructor;
-        const _timeoutIds = new Set();
-        const _setTimeout = window.setTimeout;
-        const _clearTimeout = window.clearTimeout;
-  
-        new MutationObserver(() => {
-          window.__pwBusy__("dom++");
-          requestAnimationFrame(() => { window.__pwBusy__("dom--"); });
-        }).observe(document, { attributes: true, childList: true, subtree: true });
-  
-        // Patch Promise constructor
-        window.Promise.constructor = async (resolve, reject) => {
-          window.__pwBusy__("promises++");
-  
-          const res = resolve && (async () => {
-            let val;
-            try {
-              val = await resolve();
-            } catch(err) {
-              throw err;
-            } finally {
-              window.__pwBusy__("promises--");
-            }
-            return val;
-          });
-  
-          const rej = reject && (async () => {
-            let val;
-            try {
-              val = await reject();
-            } catch(err) {
-              throw err;
-            } finally {
-              window.__pwBusy__("promises--");
-            }
-            return val;
-          });
-  
-          return _promiseConstructor.call(this, res, rej);
-        };
-  
-        // Path window.clearTimeout
-        window.clearTimeout = (id) => {
-          _clearTimeout(id);
-          if (_timeoutIds.has(id)) {
-            _timeoutIds.delete(id);
-            window.__pwBusy__("timeouts--");
+
+    await this.page.addInitScript(`{
+      const _setTimeout = window.setTimeout;
+      const _clearTimeout = window.clearTimeout;
+
+      window.clearTimeout = (timeoutId) => {
+        _clearTimeout(timeoutId);
+        window.__pwBusy__("timeouts--",timeoutId);
+      }
+
+      window.setTimeout = function(fn, delay, params) {
+        const isInNearFuture = delay < 1000 * 7;
+        var timeoutId = _setTimeout(function() {
+          try {
+            fn && fn(params);
           }
-        };
-        // Patch window.setTimeout in the near future
-        window.setTimeout = (...args) => {
-          const ms = args[1];
-          const isInNearFuture = ms < 1000 * 5;
-          if (isInNearFuture) {
-            window.__pwBusy__("timeouts++");
-            const fn = args[0];
-            if (typeof(fn) === "function") {
-              args[0]  = () => {
-                try {
-                  fn();
-                } catch(err) {
-                } finally {
-                  window.__pwBusy__("timeouts--");
-                }
-              };
-            } else {
-              args[0]  = "try{" + args[0] + "; }catch(err){};window.__pwBusy__('timeouts--');";
-            }
+          finally {
+            window.__pwBusy__("timeouts--",timeoutId);
           }
-  
-          const timeoutId = _setTimeout.apply(this, args);
-  
-          if (isInNearFuture) {
-            _timeoutIds.add(timeoutId);
-          }
-  
-          return timeoutId;
-        };
+        }, delay);
+        if (isInNearFuture) {
+          window.__pwBusy__("timeouts++",timeoutId);
+        }
+        return timeoutId;
+      }
+
+      new MutationObserver(() => {
+        window.__pwBusy__("dom++");
+        requestAnimationFrame(() => { window.__pwBusy__("dom--"); });
+      }).observe(document, { attributes: true, childList: true, subtree: true });
+
     }`);
-  
-    return async (): Promise<boolean> => {
+
+    return async (): Promise<Busy> => {
       // Check if the network or CPU are idle
-      const now = Date.now();
+      await this.page.waitForLoadState("load");
       await this.page.waitForLoadState("networkidle");
       await this.page.evaluate(`new Promise(resolve => {
         window.requestIdleCallback(() => { resolve(); });
       })`);
-      busy.networkOrCpu = Math.max(0, Date.now() - now - 3); // Allow a short delay due to node/browser bridge
-  
-      const isBusy =
-        busy.networkOrCpu +
-          busy.mutatedDom +
-          busy.pendingPromises +
-          busy.pendingTimeouts >
-        0;
-  
-      return isBusy;
+
+      // Busy pending timeout is not expected so log it.
+      if (busy.pendingTimeouts < 0) {
+        console.log(`ERRR : Pending timeouts less than 0 ${busy.pendingTimeouts}`);
+      }
+      return busy;
     };
   };
 
-  private async checkIfPageIsBusy() {
-    // Wait while the page is busy before screenshot'ing the story
-    let busyTime = 0;
-    const busyTimeout = 1000; // WHATEVER REASONABLE TIME WE DECIDE
-    const startBusyTime = Date.now();
+  
+
+  private async checkIfPageIsBusy(screenshotPath: string) {
+    const timeout = Date.now() + 10000; // WHATEVER REASONABLE TIME WE DECIDE
+    let isBusy: boolean;
+    let busy:Busy;
     do {
-      await this.page.waitForTimeout(50);
-      busyTime = Date.now() - startBusyTime;
-    } while (busyTime < busyTimeout && (await this.isPageBusy()));
-  } 
+      // Add a default wait for 1sec for css rendring, click or hover activities. 
+      // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
+      // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
+      await this.page.waitForTimeout(this.options.waitTimeScreenshot);
+      busy = await this.isPageBusy();
+      isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size + busy.pendingDom> 0;
+    } while (isBusy && Date.now() < timeout);
+
+    if (isBusy) {
+      if (busy.pendingTimeouts > 0) {
+        console.log(`E2223 : Page busy. Pending timeouts for ${this.page.url()} Path = ${screenshotPath}`);
+      }
+      else if (busy.pendingNetworkMap.size > 0) {
+        console.log(`E2223 : Page busy. Pending network for ${this.page.url()} Path = ${screenshotPath} PendingUrls = ${JSON.stringify(Array.from(busy.pendingNetworkMap))}`);
+      }
+      else if (busy.pendingDom > 0) {
+        console.log(`E2223 : Page busy. Pending dom for ${this.page.url()} Path = ${screenshotPath}`);
+      }
+      else {
+        console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
+      }
+    }
+  }
 
   public async exposeFunctions() {
-    this.isPageBusy = await this.getIsPageBusyMethod(); 
+    this.isPageBusy = await this.getIsPageBusyMethod();
     await this.page.exposeFunction("makeScreenshot", this.makeScreenshot);
     await this.page.exposeFunction("click", this.click);
     await this.page.exposeFunction("hover", this.hover);
@@ -233,7 +224,7 @@ export class PlayWrightExecutor {
   private pressKey = async (selector: string, key: string) => {
     try {
       selector = this.curateSelector(selector);
-      await this.page.press(selector, key);
+      await this.page.keyboard.press(key);
     } catch (err) {
       console.error("ERROR: pressKey: ", err.message);
       throw err;
@@ -255,10 +246,19 @@ export class PlayWrightExecutor {
     try {
       selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
+      
       await element.click({
         force: true,
       });
-      console.log("element clicked");
+
+      // Consecutive clicks or hover create timing issue hence adding small delay.
+      let delay = 100;
+      if (selector.includes("testButton")) {
+        //This is a hacky fix for a very specific test scenario.
+        delay = 6000;
+      }
+      console.log(`element ${selector} clicked`);
+      await this.page.waitForTimeout(delay);
     } catch (err) {
       console.error("ERROR: click: ", err.message);
       throw err;
@@ -268,7 +268,7 @@ export class PlayWrightExecutor {
   private makeScreenshot = async (testName?: string) => {
     try {
       let screenshotPath = this.getScreenshotPath(testName);
-      await this.checkIfPageIsBusy();
+      await this.checkIfPageIsBusy(screenshotPath);
       await this.page.screenshot({
         path: screenshotPath,
       });
@@ -285,7 +285,7 @@ export class PlayWrightExecutor {
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
 
-        await this.checkIfPageIsBusy();
+        await this.checkIfPageIsBusy(screenshotPath);
         await element.screenshot({
           path: screenshotPath,
         });
@@ -307,6 +307,8 @@ export class PlayWrightExecutor {
       await element.hover({
         force: true,
       });
+      // Consecutive clicks or hover create timing issue hence adding small delay.
+      await this.page.waitForTimeout(100);
     } catch (err) {
       console.error("ERROR: HOVER: ", err.message);
       throw err;
@@ -348,9 +350,9 @@ export class PlayWrightExecutor {
 
     if (testName) {
       testName = testName.replace(/:/g, "-");
-      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
-      screenshotPath = this.removeNonASCIICharacters(`${this.path}${sep}${this.ssNamePrefix}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`);
     }
 
     //INFO: Append file prefix if screenshot with same name exist.
@@ -365,32 +367,32 @@ export class PlayWrightExecutor {
   }
 
   // INFO: Removes non-ASCII characters
-  private removeNonASCIICharacters(name: string){
-    return name.replace(/[^\x00-\x7F]/g,"");
+  private removeNonASCIICharacters(name: string) {
+    return name.replace(/[^\x00-\x7F]/g, "");
   }
 
 
   /*  This will insert double quotes around selector string, if missing.
       Eg: buttonbutton[data-id=ex123][attr=ex432] will be changed to button[data-id="ex123"][attr="ex432"] 
   */
-  private curateSelector(selector: string){
+  private curateSelector(selector: string) {
     //No need to check if selector doesn't contain equals to (=)
-    if(selector.indexOf("=") == -1){
+    if (selector.indexOf("=") == -1) {
       return selector;
     }
 
     let newSelector = "";
-    newSelector = selector.substring(0, selector.indexOf("=")+1);
+    newSelector = selector.substring(0, selector.indexOf("=") + 1);
 
     //Loop through all attributes 
-    while(selector.indexOf("[") > -1 && selector.indexOf("=") > -1){
+    while (selector.indexOf("[") > -1 && selector.indexOf("=") > -1) {
       /*  Pulls out chars b/w equals to (=) and closing square bracket (])
           Eg: button[data-id=ex123] will give "ex123" to temp
       */
       let temp = selector.substring(selector.indexOf("=") + 1, selector.indexOf("]"));
 
       // Check if temp is not surrounded by either double/single quotes
-      if(!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')){
+      if (!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')) {
         temp = '"' + temp + '"';
       }
 
@@ -398,9 +400,9 @@ export class PlayWrightExecutor {
 
       // Move to the next chunk to curate 
       // Eg: If buttonbutton[data-id=ex123][attr=ex432] then move selector to [attr=432]
-      selector = selector.substring(selector.indexOf("]")+1, selector.length);
+      selector = selector.substring(selector.indexOf("]") + 1, selector.length);
     }
-    if(selector.length > 0){
+    if (selector.length > 0) {
       newSelector += selector;
     }
 
