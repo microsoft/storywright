@@ -1,8 +1,5 @@
 # Storywright
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
-
 Storywright is a tool to capture screenshots for React Storybook using Playwright. 
 
 ## How it works
@@ -16,14 +13,15 @@ If we have a button component, <Button />, and a story around that component, Bu
 In Button.stories.tsx:
 
 ```bash
-const StoryWriteDemo = (story) => 
+const StoryWrightDemo = (story) => 
     <StoryWright>
         {story()}
     </StoryWright>
 }
 
 export default {
-    title: "Button"
+    title: "Button",
+    decorators: [StoryWrightDemo]
 }
 
 export const ButtonStory = () => <Button></Button>
@@ -37,7 +35,7 @@ To test interactions, you can add Steps to each state to interact with the UI. T
 Here is an same example as above with interactions:
 
 ```bash
-const StoryWriteDemo = (story) => 
+const StoryWrightDemo = (story) => 
     <StoryWright
         steps={new Steps()
         click('.btn')
@@ -49,7 +47,8 @@ const StoryWriteDemo = (story) =>
 }
 
 export default {
-    title: "Button"
+    title: "Button",
+    decorators: [StoryWrightDemo]
 }
 
 export const ButtonStory = () => <Button></Button>
