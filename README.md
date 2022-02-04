@@ -1,33 +1,74 @@
-# Project
+# Storywright
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+Storywright is a tool to capture screenshots for React Storybook using Playwright. 
 
-As the maintainer of this project, please make a few updates:
+## How it works
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+Storywright works alongside Storybook to produce screenshots of the stories. In addition, it has capability to interact with the stories by clicking, hovering, waiting and many more actions.
 
-## Contributing
+Storywright exposes a React component, <StoryWright>, which can be added as a decorator in stories. For eg: 
 
-This project welcomes contributions and suggestions. Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+If we have a button component, <Button />, and a story around that component, Button.stories.tsx, then:
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+In Button.stories.tsx:
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+```bash
+const StoryWrightDemo = (story) => 
+    <StoryWright>
+        {story()}
+    </StoryWright>
+}
 
-## Trademarks
+export default {
+    title: "Button",
+    decorators: [StoryWrightDemo]
+}
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
-trademarks or logos is subject to and must follow
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+export const ButtonStory = () => <Button></Button>
+```
+
+Above code will take screenshot of the whole page where <Button> is rendered.
+
+### Testing Interactions
+To test interactions, you can add Steps to each state to interact with the UI. This is useful for clicking buttons, filling out forms, and getting the UI into the proper visual state to test.
+
+Here is an same example as above with interactions:
+
+```bash
+const StoryWrightDemo = (story) => 
+    <StoryWright
+        steps={new Steps()
+        click('.btn')
+        .snapshot('snapshot1')
+        .end()}
+    >
+        {story()}
+    </StoryWright>
+}
+
+export default {
+    title: "Button",
+    decorators: [StoryWrightDemo]
+}
+
+export const ButtonStory = () => <Button></Button>
+```
+
+Following methods are currently available:
+
+- `click(selector: string)`
+- `snapshot(filename: string)`
+- `hover(selector: string)`
+- `mouseUp(selector: string)`
+- `mouseDown(selector: string)`
+- `setValue(selector: string, value: string)`
+- `keys(selector: string, keys: string)`
+- `focus(selector: string)`
+- `executeScript(code: string)`
+- `wait(selector: string)`
+- `waitForNotFound(selector: string)`
+- `click(selector)`
+- `waitForTimeout(millisecs: number)`
+
+
+
