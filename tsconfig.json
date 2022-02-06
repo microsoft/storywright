@@ -13,7 +13,8 @@
     "inlineSourceMap": false,
     "declarationMap": false,
     "composite": true,
-    "tsBuildInfoFile": "./lib/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./lib/tsconfig.tsbuildinfo",
+    "types": ["jest", "node"]
   },
   "include": ["./src"]
 }
