@@ -1,5 +1,5 @@
 import { join } from "path";
-import { Browser, Page } from "playwright";
+import { Browser, BrowserContext, Page } from "playwright";
 import { BrowserUtils } from "./BrowserUtils";
 import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
@@ -68,9 +68,10 @@ export class StoryWrightProcessor {
               
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
-              let page: Page;
+              let context: BrowserContext;
               try {
-                page = await context.newPage();
+                context = await browser.newContext();
+                const page = await context.newPage();
                 // TODO : Move these values in config.
                 // TODO : Expose a method in Steps to set viewport size.
                 await page.setViewportSize({
@@ -139,8 +140,8 @@ export class StoryWrightProcessor {
                   `**ERROR** for story ${ssNamePrefix} ${story["id"]} ${storyIndex}/${stories.length} ${err}`
                 );
               } finally {
-                if (page != null && !page.isClosed()) {
-                  await page.close();
+                if (context != null) {
+                  await context.close();
                 }
               }
             })
