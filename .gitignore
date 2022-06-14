@@ -8,5 +8,5 @@ lib/
 
 # Dependency directories
 node_modules/
-
+coverage/
 tsconfig.tsbuildinfo
