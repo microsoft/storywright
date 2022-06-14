@@ -2,6 +2,8 @@ import * as fs from "fs";
 import { Page } from "playwright";
 import { sep } from "path";
 import { StoryWrightOptions } from "./StoryWrightOptions";
+import { parseWebPage } from "../DOMDiffing/parseDomPlaywright";
+
 /**
  * Class containing playwright exposed functions.
  */
@@ -284,7 +286,7 @@ export class PlayWrightExecutor {
       let element = await this.page.$(selector);
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
-
+        await parseWebPage(this.page, screenshotPath.replace(".png", "").replace("screenshots\\", "snapshots\\") + ".snap" , selector)    
         await this.checkIfPageIsBusy(screenshotPath);
         await element.screenshot({
           path: screenshotPath,
@@ -337,7 +339,7 @@ export class PlayWrightExecutor {
 
   private done = async () => {
     try {
-      await this.page.close();
+      // await this.page.close();
     } catch (err) {
       console.error("ERROR: completed steps: ", err.message);
       throw err;
