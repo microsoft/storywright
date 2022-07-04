@@ -52,7 +52,7 @@ export class StoryWrightProcessor {
             options.totalPartitions
           );
         }
-        // await page.close();
+        await page.close();
         console.log(`${stories.length} stories found`);
         let storyIndex = 0;
         let position = 0;

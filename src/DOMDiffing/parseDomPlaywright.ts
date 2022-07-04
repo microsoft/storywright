@@ -126,16 +126,16 @@ const parseHTMLAndKeepRelations = (selector: string) => {
 
 export const parseWebPage = async (page: Page, filename: string, selector?: any) => {
     console.log('In paseWebPages');
-    const type = filename.toLowerCase().includes("baseline") ? "BASELINE" : "CANDIDATE";
+    // const type = filename.toLowerCase().includes("baseline") ? "BASELINE" : "CANDIDATE";
 
-    console.log(`\n\n********  PARSING DOM ${type} ********`);
+    // console.log(`\n\n********  PARSING DOM ${type} ********`);
     const result = await page.evaluate(parseHTMLAndKeepRelations, selector);
     // console.log(`result: ${JSON.stringify(result, null, 2)}`);
-    console.log(`\n\nHURRAYYY !!!...COMPLETED PARSING ${type}`);
+    // console.log(`\n\nHURRAYYY !!!...COMPLETED PARSING ${type}`);
     console.log(`filename, selector: ${filename}, ${selector}`);
-    if (!fs.existsSync("dist\\snapshots")){
-        fs.mkdirSync("dist\\snapshots");
-    }
+    // if (!fs.existsSync("dist\\snapshots")){
+    //     fs.mkdirSync("dist\\snapshots");
+    // }
     fs.writeFileSync(filename, JSON.stringify(result[0], null, 2), "utf-8");
     return result[0];
 }
