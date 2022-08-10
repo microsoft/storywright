@@ -60,6 +60,8 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         const domElement = {};
 
         domElement[name] ={
+            "uniqueId": "",
+            "shifted": false,
             "nthChild": _nthChild,
             "cssComparisonResult": {},
             "attributes": {},
@@ -92,6 +94,17 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         domElement[name]["missing"] = true;
         domElement[name]["userId"] = id;
         domElement[name]["parentId"] = parentId;
+        domElement[name]["uniqueId"] = name + "*" + cleanAttributes(domElement[name]["attributes"]);
+    }
+
+    function cleanAttributes(attr) {
+        let uniqueStr = "";
+        Object.entries(attr).forEach((entry) => {
+            const [key, value] = entry;
+            console.log(`${key}: ${value}`);
+            uniqueStr += `${key}:${value}*`
+        });
+        return uniqueStr;
     }
 
     function findAppliedCSSOnElement(node){
