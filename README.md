@@ -1,6 +1,6 @@
 # Storywright
 
-Storywright is a tool to capture screenshots for React Storybook using Playwright. 
+Storywright is a tool to capture screenshots for [React Storybook](https://storybook.js.org/) using [Playwright](https://playwright.dev/). 
 
 ## How it works
 
@@ -27,7 +27,7 @@ export default {
 export const ButtonStory = () => <Button></Button>
 ```
 
-Above code will take screenshot of the whole page where <Button> is rendered.
+Above code will take screenshot of the whole page where Button is rendered.
 
 ### Testing Interactions
 To test interactions, you can add Steps to each state to interact with the UI. This is useful for clicking buttons, filling out forms, and getting the UI into the proper visual state to test.
