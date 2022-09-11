@@ -113,6 +113,11 @@ commander@^6.1.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
   integrity sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
 
+compress-json@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/compress-json/-/compress-json-2.1.1.tgz#8b29890e6bb606eb7992edd5bdeafe8a445a48da"
+  integrity sha512-ahSe5zh23mQoOA9kYtttXIRQDETKJ/u3+myRCNLsY1mOg+7pa72RHs/CjJ2n3q5Q3XJMYMHyXP+dEAapmWfYFQ==
+
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"

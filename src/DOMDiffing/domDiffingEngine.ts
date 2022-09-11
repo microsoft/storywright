@@ -1,18 +1,21 @@
-const compareDoms = (baselineDom, candidateDom) => {
+export const compareDoms = (baselineDom, candidateDom) => {
     let BTagName = Object.keys(baselineDom)[0];
     let CTageName = Object.keys(candidateDom)[0];
+    console.log(`BTagName, CTagname: ${BTagName} ${CTageName}`);
 
     if((baselineDom[BTagName]["uniqueId"] == candidateDom[CTageName]["uniqueId"]) && !candidateDom[CTageName]["found"]){
         baselineDom[BTagName]["found"] = true;
         candidateDom[CTageName]["found"] = true;
-
+        console.log(`found`);
         const cssComparisonResult = compareNodeCSS(baselineDom[BTagName]["cssProps"], candidateDom[CTageName]["cssProps"]);
-
+        if(Object.keys(cssComparisonResult).length > 0){
+            console.log(`cssComparisonResult: ${baselineDom[BTagName]["uniqueId"]}, ${candidateDom[BTagName]["uniqueId"]}`)
+        }
         candidateDom[CTageName]["cssComparisonResult"] = cssComparisonResult;
         baselineDom[BTagName]["cssComparisonResult"] = cssComparisonResult;
 
         candidateDom[CTageName]["childNodes"].forEach((CChildNode) => {
-            for(let i=0; i<baselineDom[BTagName]["childNodes"]; i++){
+            for(let i=0; i<baselineDom[BTagName]["childNodes"].length; i++){
                 let BChildNode = baselineDom[BTagName]["childNodes"][i];
     
                 if(compareDoms(BChildNode, CChildNode)){

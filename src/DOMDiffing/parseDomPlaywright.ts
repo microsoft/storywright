@@ -1,12 +1,16 @@
 import {Page} from "playwright";
 import * as fs from "fs";
-
+import { compress } from "compress-json";
 /**
  *  parseHTMLAndKeepRelations (Without underscore) contains the logic of parsing DOM.
  */
 const parseHTMLAndKeepRelations = (selector: string) => {
 
     let pageElements: any;
+    let dummy = document.createElement( 'element-' + ( new Date().getTime() ) );
+    document.body.appendChild( dummy ); 
+    // console.log(`dummmy: ${JSON.stringify(window.getComputedStyle(dummy))}`);    
+    const dummyElementStyleKeys = Object.keys(window.getComputedStyle(dummy));
 
     if(selector !== ""){
         console.log("selector exist");
@@ -16,7 +20,7 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         pageElements = document.querySelectorAll("*");    
     }
     
-    console.log(`selector, pageElements: ${selector}, ${pageElements}`);
+    // console.log(`selector, pageElements: ${selector}, ${pageElements}`);
     let pageParsedDom = {}
     let totalDomElementParsed = 0;
 
@@ -24,7 +28,7 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         if(!element["visited"]){
             pageParsedDom = iterateDomElements(element, "", 0, 0, 1);    
         }else{
-            console.log(`element, visited ${JSON.stringify(element["visited"])}`);
+            // console.log(`element, visited ${JSON.stringify(element["visited"])}`);
         }
     }
     
@@ -33,10 +37,6 @@ const parseHTMLAndKeepRelations = (selector: string) => {
             element["visited"] = false;
             markElementNonVisited(element);
         }
-    }
-
-    for(const element of pageElements){
-        console.log(element["visited"]);
     }
     
     // console.log(`pageParsedDom = ${JSON.stringify(pageParsedDom, null, 2)}`);
@@ -60,6 +60,12 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         const domElement = {};
 
         domElement[name] ={
+            "coordinates": {
+                "x": 0,
+                "y": 0,
+                "height": 0,
+                "width": 0
+            },
             "uniqueId": "",
             "shifted": false,
             "nthChild": _nthChild,
@@ -89,32 +95,40 @@ const parseHTMLAndKeepRelations = (selector: string) => {
     }
 
     function setParsedDomKeys(node, domElement, name, id, parentId){
+        const coordinates = node.getBoundingClientRect();
+        // console.log(coordinates["x"]);
+        // console.log(coordinates["y"]);
         domElement[name]["attributes"] = findElementAttributes(node);
         domElement[name]["cssProps"] = findAppliedCSSOnElement(node);
         domElement[name]["found"] = false;
         domElement[name]["userId"] = id;
         domElement[name]["parentId"] = parentId;
-        domElement[name]["uniqueId"] = name + "*" + cleanAttributes(domElement[name]["attributes"]);
+        domElement[name]["uniqueId"] = name + "-" + cleanAttributes(domElement[name]["attributes"]);
+        domElement[name]["coordinates"]["x"] = coordinates["x"];
+        domElement[name]["coordinates"]["y"] = coordinates["y"];
+        domElement[name]["coordinates"]["height"] = coordinates["height"];
+        domElement[name]["coordinates"]["width"] = coordinates["width"];
     }
 
     function cleanAttributes(attr) {
         let uniqueStr = "";
         Object.entries(attr).forEach((entry) => {
             const [key, value] = entry;
-            console.log(`${key}: ${value}`);
+            // console.log(`${key}: ${value}`);
             uniqueStr += `${key}:${value}*`
         });
         return uniqueStr;
     }
 
-    function findAppliedCSSOnElement(node){
+    function findAppliedCSSOnElement(node){   
         const appliedCSS = window.getComputedStyle(node);
         const style = {};
 
         for(let i=0; i<appliedCSS.length; i++){
             var propName = appliedCSS.item(i);
-
-            style[propName] = appliedCSS.getPropertyValue(propName);
+            if(!dummyElementStyleKeys.includes(propName)){
+                style[propName] = appliedCSS.getPropertyValue(propName);
+            }
         }
         
         return style;
@@ -149,6 +163,10 @@ export const parseWebPage = async (page: Page, filename: string, selector?: any)
     // if (!fs.existsSync("dist\\snapshots")){
     //     fs.mkdirSync("dist\\snapshots");
     // }
-    fs.writeFileSync(filename, JSON.stringify(result[0], null, 2), "utf-8");
+    const compressedResult = compress(result[0]);
+    // compress;
+    // const compressedResult = result[0];
+    fs.writeFileSync(filename, JSON.stringify(compressedResult, null, 2), "utf-8");
+    fs.writeFileSync(filename, JSON.stringify(compressedResult, null, 2), "utf-8");
     return result[0];
 }
