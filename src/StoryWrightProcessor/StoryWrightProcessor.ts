@@ -5,8 +5,8 @@ import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
 import { partitionArray } from "../utils";
 import { sep } from "path";
-import * as fs from "fs";
-import { compareDoms } from "../DOMDiffing/domDiffingEngine";
+// import * as fs from "fs";
+// import { compareDoms } from "../DOMDiffing/domDiffingEngine";
 /**
  * Class containing StoryWright operations
  */
@@ -169,37 +169,37 @@ export class StoryWrightProcessor {
     }
   }
 
-  public static async runDomDiffing(options: StoryWrightOptions) {
-    // console.log(`Starting DOM diffing: ${JSON.stringify(options.domDiffing)} ${JSON.stringify(options.report)}`);
-    console.log(`Starting DOM diffing:`);
-    const paths: string[] = options.domDiffing;
-    let baseLineDOMPath: string = paths[0];
-    let candidateDOMPath: string = paths[1];
-    const screenshotsChanged: any[] = JSON.parse(fs.readFileSync(options.report, "utf-8"))["screenshotsChanged"];
+  // public static async runDomDiffing(options: StoryWrightOptions) {
+  //   // console.log(`Starting DOM diffing: ${JSON.stringify(options.domDiffing)} ${JSON.stringify(options.report)}`);
+  //   console.log(`Starting DOM diffing:`);
+  //   const paths: string[] = options.domDiffing;
+  //   let baseLineDOMPath: string = paths[0];
+  //   let candidateDOMPath: string = paths[1];
+  //   const screenshotsChanged: any[] = JSON.parse(fs.readFileSync(options.report, "utf-8"))["screenshotsChanged"];
 
-    console.log(`baseLineDOMPath, candidateDOMPath, report: ${baseLineDOMPath}, ${candidateDOMPath} ${JSON.stringify(screenshotsChanged)}`);
+  //   console.log(`baseLineDOMPath, candidateDOMPath, report: ${baseLineDOMPath}, ${candidateDOMPath} ${JSON.stringify(screenshotsChanged)}`);
 
-    screenshotsChanged.forEach((screenshot: any) => {
-      const domCSSFile = screenshot["imageName"].replace(".png", ".json");
+  //   screenshotsChanged.forEach((screenshot: any) => {
+  //     const domCSSFile = screenshot["imageName"].replace(".png", ".json");
 
-      console.log(`domCSSFilename: ${domCSSFile}`);
+  //     console.log(`domCSSFilename: ${domCSSFile}`);
 
-      const baseLineDOMCSSsnap = baseLineDOMPath + "//" + domCSSFile;
-      const candidateDOMCSSsnap = candidateDOMPath + "//" + domCSSFile;
+  //     const baseLineDOMCSSsnap = baseLineDOMPath + "//" + domCSSFile;
+  //     const candidateDOMCSSsnap = candidateDOMPath + "//" + domCSSFile;
 
-      console.log(`baseLineDOMCSSsnap, candidateDOMCSSsnap: ${baseLineDOMCSSsnap}, ${candidateDOMCSSsnap}`);
-      // console.log(compareDoms);
+  //     console.log(`baseLineDOMCSSsnap, candidateDOMCSSsnap: ${baseLineDOMCSSsnap}, ${candidateDOMCSSsnap}`);
+  //     // console.log(compareDoms);
 
-      let baselineDom = JSON.parse(fs.readFileSync(baseLineDOMCSSsnap, "utf-8"));
-      let candidateDom = JSON.parse(fs.readFileSync(candidateDOMCSSsnap, "utf-8"));
+  //     let baselineDom = JSON.parse(fs.readFileSync(baseLineDOMCSSsnap, "utf-8"));
+  //     let candidateDom = JSON.parse(fs.readFileSync(candidateDOMCSSsnap, "utf-8"));
 
-      console.log(`baselineDom, candidateDom: ${baselineDom["html"]["uniqueId"]}`);
-      console.log(`baselineDom, candidateDom: ${candidateDom["html"]["uniqueId"]}`);
+  //     console.log(`baselineDom, candidateDom: ${baselineDom["html"]["uniqueId"]}`);
+  //     console.log(`baselineDom, candidateDom: ${candidateDom["html"]["uniqueId"]}`);
 
-      compareDoms(baselineDom, candidateDom);
+  //     compareDoms(baselineDom, candidateDom);
 
-      fs.writeFileSync(`C:/Users/vinodsharma/Documents/workspace/1JS/ooui/packages/visual-regression-tests/dist/result/${domCSSFile.replace("json", "")}_baseline.json`, JSON.stringify(baselineDom, null, 2));
-      fs.writeFileSync(`C:/Users/vinodsharma/Documents/workspace/1JS/ooui/packages/visual-regression-tests/dist/result/${domCSSFile.replace("json", "")}_candidate.json`, JSON.stringify(candidateDom, null, 2));
-    });
-  }
+  //     fs.writeFileSync(`C:/Users/vinodsharma/Documents/workspace/1JS/ooui/packages/visual-regression-tests/dist/result/${domCSSFile.replace("json", "")}_baseline.json`, JSON.stringify(baselineDom, null, 2));
+  //     fs.writeFileSync(`C:/Users/vinodsharma/Documents/workspace/1JS/ooui/packages/visual-regression-tests/dist/result/${domCSSFile.replace("json", "")}_candidate.json`, JSON.stringify(candidateDom, null, 2));
+  //   });
+  // }
 }
