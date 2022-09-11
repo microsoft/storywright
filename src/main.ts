@@ -138,9 +138,9 @@ const storyWrightOptions: StoryWrightOptions = {
   totalPartitions: args.totalPartitions,
   waitTimeScreenshot: args.waitTimeScreenshot
 };
-
-if(storyWrightOptions["domDiffing"].length >= 2){
-  StoryWrightProcessor.runDomDiffing(storyWrightOptions);
-}else{
-  StoryWrightProcessor.process(storyWrightOptions);
-}
+StoryWrightProcessor.process(storyWrightOptions);
+// if(storyWrightOptions["domDiffing"].length >= 2){
+//   StoryWrightProcessor.runDomDiffing(storyWrightOptions);
+// }else{
+//   StoryWrightProcessor.process(storyWrightOptions);
+// }
