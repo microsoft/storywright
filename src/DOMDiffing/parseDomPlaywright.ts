@@ -163,9 +163,9 @@ export const parseWebPage = async (page: Page, filename: string, selector?: any)
     // if (!fs.existsSync("dist\\snapshots")){
     //     fs.mkdirSync("dist\\snapshots");
     // }
-    const compressedResult = compress(result[0]);
-    // compress;
-    // const compressedResult = result[0];
+    // const compressedResult = compress(result[0]);
+    compress;
+    const compressedResult = result[0];
     fs.writeFileSync(filename, JSON.stringify(compressedResult, null, 2), "utf-8");
     fs.writeFileSync(filename, JSON.stringify(compressedResult, null, 2), "utf-8");
     return result[0];
