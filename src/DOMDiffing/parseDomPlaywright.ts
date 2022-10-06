@@ -166,7 +166,7 @@ export const parseWebPage = async (page: Page, filename: string, selector?: any)
     // const compressedResult = compress(result[0]);
     compress;
     const compressedResult = result[0];
-    fs.writeFileSync(filename, JSON.stringify(compressedResult, null, 2), "utf-8");
-    fs.writeFileSync(filename, JSON.stringify(compressedResult, null, 2), "utf-8");
+    fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
+    fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
     return result[0];
 }
