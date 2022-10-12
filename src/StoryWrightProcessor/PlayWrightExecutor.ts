@@ -156,18 +156,6 @@ export class PlayWrightExecutor {
 
   public async processStory() {
     const steps = this.story["steps"];
-    if(steps === undefined)
-    {
-
-    }
-    else
-    {
-      for(const step of steps)
-      {
-        console.log(step);
-      }
-    }
-    
     try {
       await StepsExecutor.executesteps(steps, this);
     } catch (err) {
