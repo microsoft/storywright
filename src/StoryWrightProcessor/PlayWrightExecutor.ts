@@ -126,7 +126,7 @@ export class PlayWrightExecutor {
 
 
   private async checkIfPageIsBusy(screenshotPath: string) {
-    const timeout = Date.now() + 10000; // WHATEVER REASONABLE TIME WE DECIDE
+    const timeout = Date.now() + 6000; // WHATEVER REASONABLE TIME WE DECIDE
     let isBusy: boolean;
     let busy: Busy;
     do {
