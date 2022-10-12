@@ -4,7 +4,7 @@ import { BrowserUtils } from "./BrowserUtils";
 import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
 import { partitionArray } from "../utils";
-import { sep } from "path";
+import { readFileSync } from 'fs';
 
 /**
  * Class containing StoryWright operations
@@ -29,11 +29,9 @@ export class StoryWrightProcessor {
         );
         const context = await browser.newContext();
         const page: Page = await context.newPage();
-
+        var getStoriesScript = readFileSync(__dirname + '/GetStories.js', 'utf8');
         await page.goto(join(options.url, "iframe.html"));
-        let stories: object[] = await page.evaluate(
-         "(__STORYBOOK_CLIENT_API__?.raw() || []).map(e => ({id: e.id, kind: e.kind, name: e.name}))"
-        );
+        let stories: object[] = await page.evaluate(getStoriesScript);
         if (options.totalPartitions > 1) {
           console.log(
             "Starting partitioning with ",
@@ -64,10 +62,14 @@ export class StoryWrightProcessor {
           );
           await Promise.all(
             itemsForBatch.map(async (story: object) => {
-              const id: string = story["id"]; 
-              
+              const id: string = story["id"];
+
               // Set story category and name as prefix for screenshot name.
-              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\","-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
+              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
+              if(!ssNamePrefix.includes("Spinner"))
+              {
+                return;
+              }
               let context: BrowserContext;
               try {
                 context = await browser.newContext();
@@ -95,45 +97,13 @@ export class StoryWrightProcessor {
 
                 //TODO: Take screenshots when user doesn't want steps to be executed.
                 if (options.skipSteps) {
-                  await page.goto(join(options.url, `iframe.html?id=${id}`));
-                  
-                  // Add style to page
-                  
-                  const isPageBusy = await new PlayWrightExecutor(
-                    page,
-                    ssNamePrefix,
-                    browserName,
-                    options
-                  ).getIsPageBusyMethod();                  
 
-                  let busyTime = 0;
-                  const busyTimeout = 1000 * 5; // WHATEVER REASONABLE TIME WE DECIDE
-                  const startBusyTime = Date.now();
-                  do {
-                    await page.waitForTimeout(50);
-                    busyTime = Date.now() - startBusyTime;
-                  } while (busyTime < busyTimeout && (await isPageBusy()));
-
-                  console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
-                  await page.screenshot({
-                    path:
-                      options.screenShotDestPath + sep + ssNamePrefix + ".png",
-                  });
                 } else {
-                  await new PlayWrightExecutor(
-                    page,
-                    ssNamePrefix,
-                    browserName, 
-                    options
-                  ).exposeFunctions();
+                  const playWrightExecutor:PlayWrightExecutor = new PlayWrightExecutor(page, ssNamePrefix, browserName, options, story);
+                  await playWrightExecutor.exposeFunctions();
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
-                  
-                  // Add style to make cursor transparent from input fields
-                 
+                  await playWrightExecutor.processStory();
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
-
-                  // Wait for close event to be fired from steps. Wait for 1 min 30 seconds.
-                  await page.waitForEvent("close", { timeout: 90000 });
                 }
               } catch (err) {
                 console.log(

@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { Page } from "playwright";
 import { sep } from "path";
 import { StoryWrightOptions } from "./StoryWrightOptions";
+import { StepsExecutor } from "./StepsExecutor";
 /**
  * Class containing playwright exposed functions.
  */
@@ -24,7 +25,8 @@ export class PlayWrightExecutor {
     private page: Page,
     private ssNamePrefix: string,
     private browserName: string,
-    private options: StoryWrightOptions
+    private options: StoryWrightOptions,
+    private story:object
   ) {
   }
 
@@ -152,25 +154,33 @@ export class PlayWrightExecutor {
     }
   }
 
-  public async exposeFunctions() {
-    this.isPageBusy = await this.getIsPageBusyMethod();
-    await this.page.exposeFunction("makeScreenshot", this.makeScreenshot);
-    await this.page.exposeFunction("click", this.click);
-    await this.page.exposeFunction("hover", this.hover);
-    await this.page.exposeFunction("wait", this.waitForSelector);
-    await this.page.exposeFunction("waitForNotFound", this.waitForNotFound);
-    await this.page.exposeFunction("elementScreenshot", this.elementScreenshot);
-    await this.page.exposeFunction("done", this.done);
-    await this.page.exposeFunction("setElementText", this.setElementText);
-    await this.page.exposeFunction("pressKey", this.pressKey);
-    await this.page.exposeFunction("executeScript", this.executeScript);
-    await this.page.exposeFunction("focus", this.focus);
-    await this.page.exposeFunction("mouseDown", this.mouseDown);
-    await this.page.exposeFunction("mouseUp", this.mouseUp);
-    await this.page.exposeFunction("waitForTimeout", this.waitForTimeout);
+  public async processStory() {
+    const steps = this.story["steps"];
+    if(steps === undefined)
+    {
+
+    }
+    else
+    {
+      for(const step of steps)
+      {
+        console.log(step);
+      }
+    }
+    
+    try {
+      await StepsExecutor.executesteps(steps, this);
+    } catch (err) {
+      console.error("ERROR: completed steps: ", err.message);
+      throw err;
+    }
   }
 
-  private waitForTimeout = async (waitTime: number) => {
+  public async exposeFunctions() {
+    this.isPageBusy = await this.getIsPageBusyMethod();
+  }
+
+  public waitForTimeout = async (waitTime: number) => {
     try {
       await this.page.waitForTimeout(waitTime);
     } catch (err) {
@@ -179,7 +189,7 @@ export class PlayWrightExecutor {
     }
   }
 
-  private mouseUp = async () => {
+  public mouseUp = async () => {
     try {
       await this.page.mouse.up();
     } catch (err) {
@@ -188,7 +198,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private mouseDown = async (selector: string) => {
+  public mouseDown = async (selector: string) => {
     try {
       let element;
       selector = this.curateSelector(selector);
@@ -202,7 +212,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private focus = async (selector: string) => {
+  public focus = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
       await this.page.focus(selector);
@@ -212,7 +222,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private executeScript = async (script: string) => {
+  public executeScript = async (script: string) => {
     try {
       await this.page.evaluate(script);
     } catch (err) {
@@ -221,7 +231,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private pressKey = async (selector: string, key: string) => {
+  public pressKey = async (selector: string, key: string) => {
     try {
       selector = this.curateSelector(selector);
       await this.page.keyboard.press(key);
@@ -231,7 +241,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private setElementText = async (selector: string, text: string) => {
+  public setElementText = async (selector: string, text: string) => {
     try {
       selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
@@ -242,7 +252,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private click = async (selector: string) => {
+  public click = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
@@ -265,7 +275,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private makeScreenshot = async (testName?: string) => {
+  public makeScreenshot = async (testName?: string) => {
     try {
       let screenshotPath = this.getScreenshotPath(testName);
       await this.checkIfPageIsBusy(screenshotPath);
@@ -278,7 +288,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private elementScreenshot = async (selector: string, testName: string) => {
+  public elementScreenshot = async (selector: string, testName: string) => {
     try {
       selector = this.curateSelector(selector);
       let element = await this.page.$(selector);
@@ -300,7 +310,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private hover = async (selector: string) => {
+  public hover = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
@@ -315,7 +325,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private waitForSelector = async (selector: string) => {
+  public waitForSelector = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector);
@@ -325,7 +335,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private waitForNotFound = async (selector: string) => {
+  public waitForNotFound = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector, { state: "detached" });
@@ -335,7 +345,7 @@ export class PlayWrightExecutor {
     }
   };
 
-  private done = async () => {
+  public done = async () => {
     try {
       await this.page.close();
     } catch (err) {
@@ -346,6 +356,10 @@ export class PlayWrightExecutor {
 
   private getScreenshotPath(testName?: String) {
     this.ssNamePrefix = this.ssNamePrefix.replace(/:/g, "-");
+    this.ssNamePrefix = this.ssNamePrefix.replace(/=/g, " ");
+    this.ssNamePrefix = this.ssNamePrefix.replace(/\"/g, " ");
+    this.ssNamePrefix = this.ssNamePrefix.replace(/</g, " ");
+    this.ssNamePrefix = this.ssNamePrefix.replace(/>/g, " ");
     let screenshotPath: string;
 
     if (testName) {

@@ -5,6 +5,7 @@ npm-debug.log*
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 lib/
+dist/
 
 # Dependency directories
 node_modules/
