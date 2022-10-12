@@ -66,10 +66,6 @@ export class StoryWrightProcessor {
 
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
-              if(!ssNamePrefix.includes("Spinner"))
-              {
-                return;
-              }
               let context: BrowserContext;
               try {
                 context = await browser.newContext();
