@@ -14,6 +14,9 @@ export class StepsExecutor {
       await executor.done();
       return;
     }
+    if (steps[0]["type"] !== StepType.SaveScreenshot && steps[0]["type"] !== StepType.CropScreenshot) {
+      await executor.makeScreenshot(steps[0].name);
+    }
     for (const step of steps) {
       const testName = step.name;
       switch (step["type"]) {

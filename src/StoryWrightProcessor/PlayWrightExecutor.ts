@@ -26,14 +26,14 @@ export class PlayWrightExecutor {
     private ssNamePrefix: string,
     private browserName: string,
     private options: StoryWrightOptions,
-    private story:object
+    private story: object
   ) {
   }
 
   public async getIsPageBusyMethod() {
-    
+
     const busy = new Busy(0, new Map<string, number>(), 0);
-    
+
     this.page.on('request', (request) => {
       const url = request.url();
       const networkCount = busy.pendingNetworkMap.get(url);
@@ -123,19 +123,19 @@ export class PlayWrightExecutor {
     };
   };
 
-  
+
 
   private async checkIfPageIsBusy(screenshotPath: string) {
     const timeout = Date.now() + 10000; // WHATEVER REASONABLE TIME WE DECIDE
     let isBusy: boolean;
-    let busy:Busy;
+    let busy: Busy;
     do {
       // Add a default wait for 1sec for css rendring, click or hover activities. 
       // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
       // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
       await this.page.waitForTimeout(this.options.waitTimeScreenshot);
       busy = await this.isPageBusy();
-      isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size + busy.pendingDom> 0;
+      isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size + busy.pendingDom > 0;
     } while (isBusy && Date.now() < timeout);
 
     if (isBusy) {
@@ -244,7 +244,7 @@ export class PlayWrightExecutor {
     try {
       selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
-      
+
       await element.click({
         force: true,
       });

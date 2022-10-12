@@ -95,7 +95,7 @@ export class StoryWrightProcessor {
                 if (options.skipSteps) {
 
                 } else {
-                  const playWrightExecutor:PlayWrightExecutor = new PlayWrightExecutor(page, ssNamePrefix, browserName, options, story);
+                  const playWrightExecutor: PlayWrightExecutor = new PlayWrightExecutor(page, ssNamePrefix, browserName, options, story);
                   await playWrightExecutor.exposeFunctions();
                   await page.goto(join(options.url, `iframe.html?id=${id}`));
                   await playWrightExecutor.processStory();
