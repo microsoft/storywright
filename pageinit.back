@@ -13,7 +13,8 @@ this.page.addInitScript(`{
   
         // Patch Promise constructor
         window.Promise.constructor = async (resolve, reject) => {
-          window.__pwBusy__("promises++");
+          console.log("promises++");
+        };
   
           const res = resolve && (async () => {
             let val;
@@ -22,7 +23,7 @@ this.page.addInitScript(`{
             } catch(err) {
               throw err;
             } finally {
-              window.__pwBusy__("promises--");
+              console.log("promises--");
             }
             return val;
           });
@@ -34,7 +35,7 @@ this.page.addInitScript(`{
             } catch(err) {
               throw err;
             } finally {
-              window.__pwBusy__("promises--");
+              console.log("promises--");
             }
             return val;
           });

@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { Page } from "playwright";
+import { Page } from "puppeteer";
 import { sep } from "path";
 import { StoryWrightOptions } from "./StoryWrightOptions";
 import { StepsExecutor } from "./StepsExecutor";
@@ -75,7 +75,7 @@ export class PlayWrightExecutor {
       }
     });
 
-    await this.page.addInitScript(`{
+    await this.page.evaluateOnNewDocument(`{
       const _setTimeout = window.setTimeout;
       const _clearTimeout = window.clearTimeout;
 
@@ -109,8 +109,10 @@ export class PlayWrightExecutor {
 
     return async (): Promise<Busy> => {
       // Check if the network or CPU are idle
-      await this.page.waitForLoadState("load");
+
+      /*await this.page.waitForLoadState("load");
       await this.page.waitForLoadState("networkidle");
+      await this.page.waitForLoadState("domcontentloaded");*/
       await this.page.evaluate(`new Promise(resolve => {
         window.requestIdleCallback(() => { resolve(); });
       })`);
@@ -222,9 +224,9 @@ export class PlayWrightExecutor {
   public pressKey = async (selector: string, key: string) => {
     try {
       selector = this.curateSelector(selector);
-      await this.page.keyboard.press(key);
+      await this.page.keyboard.press('ArrowLeft');
     } catch (err) {
-      console.error("ERROR: pressKey: ", err.message);
+      console.error("ERROR: pressKey: ", key);
       throw err;
     }
   };
@@ -233,9 +235,10 @@ export class PlayWrightExecutor {
     try {
       selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
-      await element.fill(text);
+      console.log(element);
+      //await element.fill(text);
     } catch (err) {
-      console.error("ERROR: setElementText: ", err.message);
+      console.error("ERROR: setElementText: ", text);
       throw err;
     }
   };
@@ -246,7 +249,7 @@ export class PlayWrightExecutor {
       const element = await this.page.$(selector);
 
       await element.click({
-        force: true,
+        //force: true,
       });
 
       // Consecutive clicks or hover create timing issue hence adding small delay.
@@ -280,17 +283,14 @@ export class PlayWrightExecutor {
     try {
       selector = this.curateSelector(selector);
       let element = await this.page.$(selector);
-      if (await element.isVisible()) {
+       {
         let screenshotPath = this.getScreenshotPath(testName);
 
         await this.checkIfPageIsBusy(screenshotPath);
         await element.screenshot({
           path: screenshotPath,
         });
-      } else {
-        console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
-        await this.makeScreenshot(testName);
-      }
+      } 
     } catch (err) {
       console.error("ERROR: ELEMENT_SCREENSHOT: ", err.message);
       console.info("Trying full page screenshot");
@@ -302,9 +302,7 @@ export class PlayWrightExecutor {
     try {
       selector = this.curateSelector(selector);
       const element = await this.page.$(selector);
-      await element.hover({
-        force: true,
-      });
+      await element.hover();
       // Consecutive clicks or hover create timing issue hence adding small delay.
       await this.page.waitForTimeout(100);
     } catch (err) {
@@ -326,7 +324,7 @@ export class PlayWrightExecutor {
   public waitForNotFound = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
-      await this.page.waitForSelector(selector, { state: "detached" });
+      await this.page.waitForSelector(selector);
     } catch (err) {
       console.error("ERROR: waitForNotFound: ", err.message);
       throw err;

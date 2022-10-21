@@ -5,15 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "C:\\GIT\\fluentui\\apps\\vr-tests-react-components",
             "program": "${workspaceFolder}\\bin\\storywright.js",
-            "args": ["--browsers","chromium","--concurrency","1","--destpath","baseline","--headless","true"],
+            "args": ["--url","dist\\storybook","--browsers","chromium","--concurrency","3","--destpath","out","--headless","false","--totalPartitions","20","--partitionIndex","1"],
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": [
                 "${workspaceFolder}/lib/**/*.js"

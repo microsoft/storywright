@@ -1,4 +1,4 @@
-import * as playwright from "playwright";
+import * as puppeteer from "puppeteer";
 import { BrowserName } from "./Constants";
 export class BrowserUtils {
   /**
@@ -13,11 +13,11 @@ export class BrowserUtils {
   ) {
     switch (browserName) {
       case BrowserName.Chromium:
-        return await playwright.chromium.launch({ args: ["--allow-file-access-from-files"], headless });
+        return await puppeteer.launch({ args: ["--disable-gpu, --allow-file-access-from-files"], headless });
       case BrowserName.Firefox:
-        return await playwright.firefox.launch({ headless });
+        return await puppeteer.launch({ headless });
       case BrowserName.Webkit:
-        return await playwright.webkit.launch({ headless });
+        return await puppeteer.launch({ headless });
     }
   }
 }

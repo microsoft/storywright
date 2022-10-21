@@ -1,5 +1,5 @@
 import { join } from "path";
-import { Browser, BrowserContext, Page } from "playwright";
+import { Browser, BrowserContext, Page } from "puppeteer";
 import { BrowserUtils } from "./BrowserUtils";
 import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
@@ -27,11 +27,11 @@ export class StoryWrightProcessor {
           browserName,
           options.headless
         );
-        const context = await browser.newContext();
-        const page: Page = await context.newPage();
+        const page: Page = await browser.newPage();
         var getStoriesScript = readFileSync(__dirname + '/GetStories.js', 'utf8');
         await page.goto(join(options.url, "iframe.html"));
-        let stories: object[] = await page.evaluate(getStoriesScript);
+        
+        let stories: object[]= await page.evaluate(getStoriesScript) as object[];
         if (options.totalPartitions > 1) {
           console.log(
             "Starting partitioning with ",
@@ -68,17 +68,15 @@ export class StoryWrightProcessor {
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let context: BrowserContext;
               try {
-                context = await browser.newContext();
-                const page = await context.newPage();
+                const page = await browser.newPage();
                 // TODO : Move these values in config.
                 // TODO : Expose a method in Steps to set viewport size.
-                await page.setViewportSize({
+                await page.setViewport({
                   width: 1920,
-                  height: 964,
+                  height: 964
                 });
-
                 // Add basic CSS normalization
-                await page.addInitScript(() => {
+                await page.evaluateOnNewDocument(() => {
                   document.addEventListener("DOMContentLoaded", () => {
                     const style = document.createElement("style");
                     style.textContent = `
@@ -97,7 +95,8 @@ export class StoryWrightProcessor {
                 } else {
                   const playWrightExecutor: PlayWrightExecutor = new PlayWrightExecutor(page, ssNamePrefix, browserName, options, story);
                   await playWrightExecutor.exposeFunctions();
-                  await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  await page.goto(join(options.url, `iframe.html?id=${id}`),{waitUntil:"domcontentloaded"});
+                  
                   await playWrightExecutor.processStory();
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
                 }
@@ -113,6 +112,7 @@ export class StoryWrightProcessor {
             })
           ).catch((reason) => {
             console.log(`**ERROR** ${reason}`);
+            page.close();
           });
           position += options.concurrency;
         }

@@ -7,7 +7,7 @@ import { PlayWrightExecutor } from "./PlayWrightExecutor";
  */
 export class StepsExecutor {
   public static async executesteps(steps: any[], executor: PlayWrightExecutor) {
-
+    await executor.waitForTimeout(1000);
     if (steps === null || steps === undefined || steps.length == 0) {
       console.log(`Steps object is ${steps}`);
       await executor.makeScreenshot();
