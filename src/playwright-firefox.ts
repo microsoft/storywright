@@ -1,11 +1,11 @@
-import { Page, chromium } from "playwright";
+import { Page, firefox } from "playwright";
 import { join } from "path";
 const fs = require('fs');
 
 async function main(): Promise<void> {
     try {
         const headless = true;
-        const browser = await chromium.launch({ headless });
+        const browser = await firefox.launch({ headless });
         const context = await browser.newContext();
         const page: Page = await context.newPage();
         const pagePath = join(`file:///${process.cwd()}/storybook`, `iframe.html?id=avatar-converged--size-active-badge`);
@@ -15,7 +15,7 @@ async function main(): Promise<void> {
         let selector: string = ".testWrapper";
         let element = await page.$(selector);
         if (await element.isVisible()) {
-            let screenshotName = "playwright-chrome-run";
+            let screenshotName = "playwright-firefox-run";
             let count = 1;
             while( fs.existsSync(`${screenshotName}_${count}_A.png`))
             {
@@ -32,7 +32,7 @@ async function main(): Promise<void> {
         await page.waitForTimeout(2000);
 
         if (await element.isVisible()) {
-            let screenshotName = "playwright-chrome-run";
+            let screenshotName = "playwright-firefox-run";
             let count = 1;
             while( fs.existsSync(`${screenshotName}_${count}_B.png`))
             {

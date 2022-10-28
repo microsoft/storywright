@@ -12,7 +12,8 @@
   "scripts": {
     "build": "tsc",
     "start": "tsc -w --preserveWatchOutput",
-    "chrome": "node ./lib/playwright-chromium.js"
+    "chrome": "node ./lib/playwright-chromium.js",
+    "firefox": "node ./lib/playwright-firefox.js"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
