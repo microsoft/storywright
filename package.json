@@ -13,14 +13,16 @@
     "build": "tsc",
     "start": "tsc -w --preserveWatchOutput",
     "chrome": "node ./lib/playwright-chromium.js",
-    "firefox": "node ./lib/playwright-firefox.js"
+    "firefox": "node ./lib/playwright-firefox.js",
+    "pupp-chrome": "node ./lib/pupeteer-chromium.js"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
   },
   "types": "lib/index.d.ts",
   "dependencies": {
-    "playwright": "^1.11.1"
+    "playwright": "^1.27.1",
+    "puppeteer": "19.2.0"
   },
   "peerDependencies": {},
   "devDependencies": {
