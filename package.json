@@ -1,5 +1,5 @@
 {
-  "name": "storywright",
+  "name": "testrepro",
   "description": "Storybook setup.",
   "license": "MIT",
   "version": "0.0.22",
@@ -7,11 +7,12 @@
   "module": "lib/index.js",
   "typings": "lib/index.d.ts",
   "bin": {
-    "storywright": "./bin/storywright.js"
+    "chrome": "./lib/playwright-chromium.js"
   },
   "scripts": {
     "build": "tsc",
-    "start": "tsc -w --preserveWatchOutput"
+    "start": "tsc -w --preserveWatchOutput",
+    "chrome": "node ./lib/playwright-chromium.js"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
