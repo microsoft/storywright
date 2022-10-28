@@ -4,7 +4,7 @@ const fs = require('fs');
 
 async function main(): Promise<void> {
     try {
-        const headless = false;
+        const headless = true;
         const browser = await chromium.launch({ args: ["--allow-file-access-from-files"], headless });
         const context = await browser.newContext();
         const page: Page = await context.newPage();
