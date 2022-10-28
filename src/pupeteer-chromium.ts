@@ -4,7 +4,7 @@ const fs = require('fs');
 
 async function main(): Promise<void> {
     try {
-        const headless = false;
+        const headless = true;
         const browser = await launch({ headless });
         const page: Page = await browser.newPage();
         const pagePath = join(`file:///${process.cwd()}/storybook`, `iframe.html?id=avatar-converged--size-active-badge`);
