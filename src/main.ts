@@ -44,13 +44,6 @@ const args = argv
     nargs: 1,
     type: "boolean"
   })
-  .option("report", {
-    alias: "report",
-    default: "dist/screenshots/storybook",
-    describe: "Pixel Diff report location",
-    nargs: 1,
-    type: "string",
-  })
   .option("headless", {
     alias: "headless",
     default: false,
