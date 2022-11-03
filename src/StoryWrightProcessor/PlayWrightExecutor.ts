@@ -275,7 +275,9 @@ export class PlayWrightExecutor {
         path: screenshotPath,
       });
       console.log(`saving snapshot`);
-      await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "")    ;
+      if(this.options.parseDom){
+        await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "")    ;
+      }
     } catch (err) {
       console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
       throw err;
@@ -292,7 +294,9 @@ export class PlayWrightExecutor {
         await element.screenshot({
           path: screenshotPath,
         });
-        await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt" , selector);    
+        if(this.options.parseDom){
+          await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt" , selector);
+        }
       } else {
         console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
         await this.makeScreenshot(testName);

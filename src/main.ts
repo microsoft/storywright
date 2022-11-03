@@ -36,16 +36,13 @@ const args = argv
     },
     choices: [BrowserName.Chromium, BrowserName.Firefox, BrowserName.Webkit],
   })
-  .option("domDiffing", {
-    alias: "domDiffing",
-    default: ["baselinePath"],
+  .option("paseDom", {
+    alias: "parseDom",
+    default: false,
     describe:
-      "Run Dom Diffing tool against changed screenshots",
+      "Parse DOM/CSS information of page and store it in a file.",
     nargs: 1,
-    type: "array",
-    coerce: (array) => {
-      return array.flatMap((v) => v.split(","));
-    },
+    type: "boolean"
   })
   .option("report", {
     alias: "report",
@@ -129,7 +126,7 @@ const storyWrightOptions: StoryWrightOptions = {
   url: url,
   screenShotDestPath: args.destpath,
   browsers: args.browsers,
-  domDiffing: args.domDiffing,
+  parseDom: args.parseDom,
   report: args.report,
   headless: args.headless,
   concurrency: args.concurrency,
@@ -138,9 +135,4 @@ const storyWrightOptions: StoryWrightOptions = {
   totalPartitions: args.totalPartitions,
   waitTimeScreenshot: args.waitTimeScreenshot
 };
-// StoryWrightProcessor.process(storyWrightOptions);
-if(storyWrightOptions["domDiffing"].length >= 2){
-  StoryWrightProcessor.runDomDiffing(storyWrightOptions);
-}else{
-  StoryWrightProcessor.process(storyWrightOptions);
-}
+StoryWrightProcessor.process(storyWrightOptions);
