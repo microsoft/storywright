@@ -36,7 +36,7 @@ const args = argv
     },
     choices: [BrowserName.Chromium, BrowserName.Firefox, BrowserName.Webkit],
   })
-  .option("paseDom", {
+  .option("parseDom", {
     alias: "parseDom",
     default: false,
     describe:
@@ -120,7 +120,6 @@ const storyWrightOptions: StoryWrightOptions = {
   screenShotDestPath: args.destpath,
   browsers: args.browsers,
   parseDom: args.parseDom,
-  report: args.report,
   headless: args.headless,
   concurrency: args.concurrency,
   skipSteps: args.skipSteps,
