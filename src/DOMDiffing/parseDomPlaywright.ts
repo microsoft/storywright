@@ -5,16 +5,16 @@ import { compress } from "compress-json";
 const parseHTMLAndKeepRelations = (selector: string) => {
 
     let pageElements: any;
-    let dummy = document.createElement( 'element-' + ( new Date().getTime() ) );
+    let dummy = document.createElement( 'element-' + ( Date.now() ) );
     document.body.appendChild( dummy );   
     const dummyElementStyleKeys = Object.keys(window.getComputedStyle(dummy));
 
     if(selector !== ""){
         console.log("selector exist");
-        pageElements = document.querySelectorAll(selector);
+        pageElements = document.querySelector(selector);
     } else{
         console.log("selector doesn't exist");
-        pageElements = document.querySelectorAll("*");    
+        pageElements = document.querySelector("html");    
     }
     
     let pageParsedDom = {}
@@ -88,7 +88,7 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         domElement[name]["attributes"] = findElementAttributes(node);
         domElement[name]["cssProps"] = findAppliedCSSOnElement(node);
         domElement[name]["found"] = false;
-        domElement[name]["userId"] = id;
+        domElement[name]["elementId"] = id;
         domElement[name]["parentId"] = parentId;
         domElement[name]["uniqueId"] = name + "-" + cleanAttributes(domElement[name]["attributes"]);
         domElement[name]["coordinates"]["x"] = coordinates["x"];
@@ -126,7 +126,7 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         if(node.hasAttributes()){
             const attributes = node.attributes;
             for(let i=0; i<attributes.length; i++){
-                if(attributes[i].name !== "userId"){
+                if(attributes[i].name !== "elementId"){
                     attrsValue[attributes[i].name] = attributes[i].value;
                 }
             }    
@@ -147,6 +147,6 @@ export const parseWebPage = async (page: Page, filename: string, selector?: any)
     // compress;
     // const compressedResult = result[0];
     fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
-    fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
+    // fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
     return result[0];
 }
