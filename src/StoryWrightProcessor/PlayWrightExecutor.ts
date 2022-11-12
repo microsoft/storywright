@@ -195,7 +195,7 @@ export class PlayWrightExecutor {
       await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await this.page.mouse.down();
     } catch (err) {
-      console.error("ERROR: mouseDown: ", err.message);
+      console.error(`ERROR: mouseDown: selector ${selector}`, err.message);
       throw err;
     }
   };
@@ -205,7 +205,7 @@ export class PlayWrightExecutor {
       selector = this.curateSelector(selector);
       await this.page.focus(selector);
     } catch (err) {
-      console.error("ERROR: focus: ", err.message);
+      console.error(`ERROR: focus: selector ${selector}`, err.message);
       throw err;
     }
   };
@@ -214,7 +214,7 @@ export class PlayWrightExecutor {
     try {
       await this.page.evaluate(script);
     } catch (err) {
-      console.error("ERROR: executeScript: ", err.message);
+      console.error(`ERROR: executeScript: ${script}`, err.message);
       throw err;
     }
   };
@@ -224,7 +224,7 @@ export class PlayWrightExecutor {
       selector = this.curateSelector(selector);
       await this.page.keyboard.press(key);
     } catch (err) {
-      console.error("ERROR: pressKey: ", err.message);
+      console.error(`ERROR: pressKey: selector ${selector}, key ${key}`, err.message);
       throw err;
     }
   };
@@ -235,7 +235,7 @@ export class PlayWrightExecutor {
       const element = await this.page.$(selector);
       await element.fill(text);
     } catch (err) {
-      console.error("ERROR: setElementText: ", err.message);
+      console.error(`ERROR: setElementText : selector ${selector} : text ${text}`, err.message);
       throw err;
     }
   };
@@ -250,7 +250,7 @@ export class PlayWrightExecutor {
       });
 
       // Consecutive clicks or hover create timing issue hence adding small delay.
-      let delay = 100;
+      let delay = 200;
       if (selector.includes("testButton")) {
         //This is a hacky fix for a very specific test scenario.
         delay = 6000;
@@ -258,7 +258,7 @@ export class PlayWrightExecutor {
       console.log(`element ${selector} clicked`);
       await this.page.waitForTimeout(delay);
     } catch (err) {
-      console.error("ERROR: click: ", err.message);
+      console.error(`ERROR: clicking: ${selector}`, err.message);
       throw err;
     }
   };
@@ -288,11 +288,11 @@ export class PlayWrightExecutor {
           path: screenshotPath,
         });
       } else {
-        console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
+        console.log(`ERROR: Element NOT VISIBLE: CAPTURING PAGE ${selector}`);
         await this.makeScreenshot(testName);
       }
     } catch (err) {
-      console.error("ERROR: ELEMENT_SCREENSHOT: ", err.message);
+      console.error(`ERROR: ELEMENT_SCREENSHOT: ${selector}`, err.message);
       console.info("Trying full page screenshot");
       await this.makeScreenshot(testName);
     }
@@ -308,7 +308,7 @@ export class PlayWrightExecutor {
       // Consecutive clicks or hover create timing issue hence adding small delay.
       await this.page.waitForTimeout(100);
     } catch (err) {
-      console.error("ERROR: HOVER: ", err.message);
+      console.error(`ERROR: HOVER: ${selector}`, err.message);
       throw err;
     }
   };
@@ -318,7 +318,7 @@ export class PlayWrightExecutor {
       selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector);
     } catch (err) {
-      console.error("ERROR: waitForSelector: ", err.message);
+      console.error(`ERROR: waitForSelector: ${selector}`, err.message);
       throw err;
     }
   };
@@ -328,7 +328,7 @@ export class PlayWrightExecutor {
       selector = this.curateSelector(selector);
       await this.page.waitForSelector(selector, { state: "detached" });
     } catch (err) {
-      console.error("ERROR: waitForNotFound: ", err.message);
+      console.error(`ERROR: waitForNotFound: ${selector}`, err.message);
       throw err;
     }
   };
