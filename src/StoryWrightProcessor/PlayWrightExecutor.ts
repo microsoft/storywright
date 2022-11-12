@@ -352,6 +352,10 @@ export class PlayWrightExecutor {
 
     if (testName) {
       testName = testName.replace(/:/g, "-");
+      testName = testName.replace(/=/g, " ");
+      testName = testName.replace(/\"/g, " ");
+      testName = testName.replace(/</g, " ");
+      testName = testName.replace(/>/g, " ");
       screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
       screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`);
