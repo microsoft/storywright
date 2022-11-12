@@ -123,17 +123,19 @@ export class PlayWrightExecutor {
     };
   };
 
-
+  private delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+  }
 
   private async checkIfPageIsBusy(screenshotPath: string) {
-    const timeout = Date.now() + 6000; // WHATEVER REASONABLE TIME WE DECIDE
+    const timeout = Date.now() + 5000; // WHATEVER REASONABLE TIME WE DECIDE
     let isBusy: boolean;
     let busy: Busy;
     do {
       // Add a default wait for 1sec for css rendring, click or hover activities. 
       // Ideally the test should be authored in such a way that it should wait for element to be visible and then take screenshot but that gets missed out in most test cases.
       // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
-      await this.page.waitForTimeout(this.options.waitTimeScreenshot);
+      await this.delay(this.options.waitTimeScreenshot);
       busy = await this.isPageBusy();
       isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size + busy.pendingDom > 0;
     } while (isBusy && Date.now() < timeout);
@@ -256,7 +258,7 @@ export class PlayWrightExecutor {
         delay = 6000;
       }
       console.log(`element ${selector} clicked`);
-      await this.page.waitForTimeout(delay);
+      await this.delay(delay);
     } catch (err) {
       console.error(`ERROR: clicking: ${selector}`, err.message);
       throw err;
@@ -306,7 +308,7 @@ export class PlayWrightExecutor {
         force: true,
       });
       // Consecutive clicks or hover create timing issue hence adding small delay.
-      await this.page.waitForTimeout(100);
+      await this.delay(100);
     } catch (err) {
       console.error(`ERROR: HOVER: ${selector}`, err.message);
       throw err;
