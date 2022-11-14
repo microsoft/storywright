@@ -77,23 +77,23 @@ export class PlayWrightExecutor {
       const _setTimeout = window.setTimeout;
       const _clearTimeout = window.clearTimeout;
 
-      window.clearTimeout = (timeoutId) => {
+      window.clearTimeout = async (timeoutId) => {
         _clearTimeout(timeoutId);
-        window.__pwBusy__("timeouts--",timeoutId);
+        await window.__pwBusy__("timeouts--",timeoutId);
       }
 
-      window.setTimeout = function(fn, delay, params) {
+      window.setTimeout = async function(fn, delay, params) {
         const isInNearFuture = delay < 1000 * 7;
-        var timeoutId = _setTimeout(function() {
+        var timeoutId = _setTimeout(async function() {
           try {
             fn && fn(params);
           }
           finally {
-            window.__pwBusy__("timeouts--",timeoutId);
+            await window.__pwBusy__("timeouts--",timeoutId);
           }
         }, delay);
         if (isInNearFuture) {
-          window.__pwBusy__("timeouts++",timeoutId);
+          await window.__pwBusy__("timeouts++",timeoutId);
         }
         return timeoutId;
       }
