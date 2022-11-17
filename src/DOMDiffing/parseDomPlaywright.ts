@@ -5,10 +5,11 @@ import { compress } from "compress-json";
 const parseHTMLAndKeepRelations = (selector: string) => {
 
     let pageElements: any;
-    let dummy = document.createElement( 'element-' + ( Date.now() ) );
-    document.body.appendChild( dummy );   
-    const dummyElementStyleKeys = Object.keys(window.getComputedStyle(dummy));
-
+    // let dummy = document.createElement( 'element-' + ( Date.now() ) );
+    // document.body.appendChild( dummy );   
+    // const dummyElementStyleKeys = Object.keys(window.getComputedStyle(dummy));
+    const dummyNodeMap = new Map();
+    ;
     if(selector !== ""){
         console.log("selector exist");
         pageElements = document.querySelector(selector);
@@ -109,10 +110,22 @@ const parseHTMLAndKeepRelations = (selector: string) => {
     function findAppliedCSSOnElement(node){   
         const appliedCSS = window.getComputedStyle(node);
         const style = {};
+        const dummyNode = document.createElement(node.tagName);
+
+        node.getAttribute("type") ? dummyNode.setAttribute("type", node.getAttribute("type")) : null;
+        console.log(`node.tagName, dummyNode.tagName: ${dummyNode.tagName}, ${node.tagName}`);
+        let dummyNodeStyle = [];
+
+        if(!dummyNodeMap.has(node.tagName)){
+            dummyNodeStyle = Object.keys(window.getComputedStyle(dummyNode));
+            dummyNodeMap.set(node.tagName, dummyNodeStyle);
+        } else {
+            dummyNodeStyle = dummyNodeMap.get(node.tagName);
+        }
 
         for(let i=0; i<appliedCSS.length; i++){
             var propName = appliedCSS.item(i);
-            if(!dummyElementStyleKeys.includes(propName)){
+            if(!dummyNodeStyle.includes(propName)){
                 style[propName] = appliedCSS.getPropertyValue(propName);
             }
         }
@@ -140,13 +153,12 @@ const parseHTMLAndKeepRelations = (selector: string) => {
 export const parseWebPage = async (page: Page, filename: string, selector?: any) => {
     console.log('In paseWebPages');
 
-    console.log(`\n\n********  PARSING DOM ********`);
+    console.log(`\n\n********  PARSING DOM  ********`);
     const result = await page.evaluate(parseHTMLAndKeepRelations, selector);
     console.log(`filename, selector: ${filename}, ${selector}`);
     const compressedResult = compress(result[0]);
     // compress;
     // const compressedResult = result[0];
     fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
-    // fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
     return result[0];
 }
