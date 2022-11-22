@@ -3,8 +3,7 @@ import * as fs from "fs";
 import { compress } from "compress-json";
 
 const parseHTMLAndKeepRelations = (selector: string) => {
-
-    let pageElements: any;
+    let rootElement: any;
     // let dummy = document.createElement( 'element-' + ( Date.now() ) );
     // document.body.appendChild( dummy );   
     // const dummyElementStyleKeys = Object.keys(window.getComputedStyle(dummy));
@@ -12,39 +11,20 @@ const parseHTMLAndKeepRelations = (selector: string) => {
     ;
     if(selector !== ""){
         console.log("selector exist");
-        pageElements = document.querySelector(selector);
+        rootElement = document.querySelector(selector);
     } else{
         console.log("selector doesn't exist");
-        pageElements = document.querySelector("html");    
+        rootElement = document.querySelector("html");  
     }
     
     let pageParsedDom = {}
     let totalDomElementParsed = 0;
-
-    for(const element of pageElements){
-        if(!element["visited"]){
-            pageParsedDom = iterateDomElements(element, "", 0, 0, 1);    
-        }
-    }
-    
-    for(const element of pageElements){
-        if(element["visited"]){
-            element["visited"] = false;
-            markElementNonVisited(element);
-        }
-    }
+    pageParsedDom = iterateDomElements(rootElement, "", 0, 0, 1);
     
     return [
         pageParsedDom,
         totalDomElementParsed
     ];
-
-    function markElementNonVisited(node) {
-        console.log("marking element false");
-        for(const childNode of node.childNodes){
-            childNode["visited"] = false;
-        }
-    }
 
     function iterateDomElements(node, parent, id, parentId, _nthChild) {
         ++totalDomElementParsed;
@@ -72,12 +52,8 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         setParsedDomKeys(node, domElement, name, id, parentId);
         let nthChild = 0;
         for(const childNode of node.childNodes){
-            if(childNode.tagName && !childNode["visited"]){
-                if (childNode.tagName.toLowerCase() == "script"){
-                    childNode["visited"] = true;
-                }else{
-                    domElement[name]["childNodes"].push(iterateDomElements(childNode, domElement[name]["path"], id+1, id+1, ++nthChild));
-                }
+            if(childNode.tagName && !(childNode.tagName.toLowerCase() == "script")){
+                domElement[name]["childNodes"].push(iterateDomElements(childNode, domElement[name]["path"], id+1, id+1, ++nthChild));
             }
         }
 
@@ -107,12 +83,12 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         return uniqueStr;
     }
 
-    function findAppliedCSSOnElement(node){   
+    function findAppliedCSSOnElement(node){
         const appliedCSS = window.getComputedStyle(node);
         const style = {};
-        const dummyNode = document.createElement(node.tagName);
-
+        const dummyNode = document.createElement(node.tagName);        
         node.getAttribute("type") ? dummyNode.setAttribute("type", node.getAttribute("type")) : null;
+        // document.body.append(dummyNode);
         console.log(`node.tagName, dummyNode.tagName: ${dummyNode.tagName}, ${node.tagName}`);
         let dummyNodeStyle = [];
 

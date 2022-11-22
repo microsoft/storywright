@@ -111,6 +111,7 @@ console.log(`Concurrency = ${args.concurrency}`);
 console.log(`Cores available on system  = ${cpus().length}`);
 console.log(`SkipSteps = ${args.skipSteps}`);
 console.log(`WaitTimeScreenshot = ${args.waitTimeScreenshot}`);
+console.log(`Parse DOM = ${args.parseDom}`);
 console.log(
   `================ Starting story right execution =================`
 );
