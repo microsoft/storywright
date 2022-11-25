@@ -135,9 +135,9 @@ export const parseWebPage = async (page: Page, filename: string, selector?: any)
     console.log(`\n\n********  PARSING DOM  ********`);
     const result = await page.evaluate(parseHTMLAndKeepRelations, selector);
     console.log(`filename, selector: ${filename}, ${selector}`);
-    // const compressedResult = compress(result[0]);
-    compress;
-    const compressedResult = result[0];
+    const compressedResult = compress(result[0]);
+    // compress;
+    // const compressedResult = result[0];
     fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
     return result[0];
 }
