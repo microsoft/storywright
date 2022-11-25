@@ -4,14 +4,17 @@ import { compress } from "compress-json";
 
 const parseHTMLAndKeepRelations = (selector: string) => {
     let rootElement: any;
-    // let dummy = document.createElement( 'element-' + ( Date.now() ) );
-    // document.body.appendChild( dummy );   
-    // const dummyElementStyleKeys = Object.keys(window.getComputedStyle(dummy));
+    const rootElementLoc = {
+        x: 0,
+        y: 0,
+    };
     const dummyNodeMap = new Map();
-    ;
+
     if(selector !== ""){
         console.log("selector exist");
         rootElement = document.querySelector(selector);
+        rootElementLoc["x"] = rootElement.getBoundingClientRect().x;
+        rootElementLoc["y"] = rootElement.getBoundingClientRect().y;
     } else{
         console.log("selector doesn't exist");
         rootElement = document.querySelector("html");  
@@ -68,8 +71,8 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         domElement[name]["elementId"] = id;
         domElement[name]["parentId"] = parentId;
         domElement[name]["uniqueId"] = name + "-" + cleanAttributes(domElement[name]["attributes"]);
-        domElement[name]["coordinates"]["x"] = coordinates["x"];
-        domElement[name]["coordinates"]["y"] = coordinates["y"];
+        domElement[name]["coordinates"]["x"] = coordinates["x"] - rootElementLoc["x"];
+        domElement[name]["coordinates"]["y"] = coordinates["y"] - rootElementLoc["y"];
         domElement[name]["coordinates"]["height"] = coordinates["height"];
         domElement[name]["coordinates"]["width"] = coordinates["width"];
     }
@@ -132,9 +135,9 @@ export const parseWebPage = async (page: Page, filename: string, selector?: any)
     console.log(`\n\n********  PARSING DOM  ********`);
     const result = await page.evaluate(parseHTMLAndKeepRelations, selector);
     console.log(`filename, selector: ${filename}, ${selector}`);
-    const compressedResult = compress(result[0]);
-    // compress;
-    // const compressedResult = result[0];
+    // const compressedResult = compress(result[0]);
+    compress;
+    const compressedResult = result[0];
     fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
     return result[0];
 }
