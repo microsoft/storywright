@@ -22,20 +22,14 @@ const parseHTMLAndKeepRelations = (selector: string) => {
     
     let pageParsedDom = {}
     let totalDomElementParsed = 0;
-    pageParsedDom = iterateDomElements(rootElement, "", 0, 0, 1);
-    
-    return [
-        pageParsedDom,
-        totalDomElementParsed
-    ];
 
-    function iterateDomElements(node, parent, id, parentId, _nthChild) {
+    const  iterateDomElements = (node: any, parent: string, id: number, parentId: number, _nthChild: number) => {
         ++totalDomElementParsed;
         node["visited"] = true;
-        let name = node["tagName"].toLowerCase();
+        let name: string = node["tagName"].toLowerCase();
         const domElement = {};
 
-        domElement[name] ={
+        domElement[name] = {
             "coordinates": {
                 "x": 0,
                 "y": 0,
@@ -54,30 +48,17 @@ const parseHTMLAndKeepRelations = (selector: string) => {
 
         setParsedDomKeys(node, domElement, name, id, parentId);
         let nthChild = 0;
-        for(const childNode of node.childNodes){
-            if(childNode.tagName && !(childNode.tagName.toLowerCase() == "script")){
-                domElement[name]["childNodes"].push(iterateDomElements(childNode, domElement[name]["path"], id+1, id+1, ++nthChild));
+        if(node.hasChildNodes()){
+            for(const childNode of node.childNodes){
+                if(childNode.tagName && !(childNode.tagName.toLowerCase() == "script")){
+                    domElement[name]["childNodes"].push(iterateDomElements(childNode, domElement[name]["path"], id+1, id+1, ++nthChild));
+                }
             }
         }
-
         return domElement;
     }
 
-    function setParsedDomKeys(node, domElement, name, id, parentId){
-        const coordinates = node.getBoundingClientRect();
-        domElement[name]["attributes"] = findElementAttributes(node);
-        domElement[name]["cssProps"] = findAppliedCSSOnElement(node);
-        domElement[name]["found"] = false;
-        domElement[name]["elementId"] = id;
-        domElement[name]["parentId"] = parentId;
-        domElement[name]["uniqueId"] = name + "-" + cleanAttributes(domElement[name]["attributes"]);
-        domElement[name]["coordinates"]["x"] = coordinates["x"] - rootElementLoc["x"];
-        domElement[name]["coordinates"]["y"] = coordinates["y"] - rootElementLoc["y"];
-        domElement[name]["coordinates"]["height"] = coordinates["height"];
-        domElement[name]["coordinates"]["width"] = coordinates["width"];
-    }
-
-    function cleanAttributes(attr) {
+    const cleanAttributes = (attr: string) => {
         let uniqueStr = "";
         Object.entries(attr).forEach((entry) => {
             const [key, value] = entry;
@@ -86,7 +67,7 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         return uniqueStr;
     }
 
-    function findAppliedCSSOnElement(node){
+    const findAppliedCSSOnElement = (node: any) =>{
         const appliedCSS = window.getComputedStyle(node);
         const style = {};
         const dummyNode = document.createElement(node.tagName);        
@@ -112,7 +93,7 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         return style;
     }
 
-    function findElementAttributes(node){
+    const findElementAttributes = (node: any) => {
         const attrsValue = {};
 
         if(node.hasAttributes()){
@@ -126,18 +107,37 @@ const parseHTMLAndKeepRelations = (selector: string) => {
 
         return attrsValue;
     }
+
+    const setParsedDomKeys = (node: any, domElement, name, id, parentId) => {
+        const coordinates = node.getBoundingClientRect();
+        domElement[name]["attributes"] = findElementAttributes(node);
+        domElement[name]["cssProps"] = findAppliedCSSOnElement(node);
+        domElement[name]["found"] = false;
+        domElement[name]["elementId"] = id;
+        domElement[name]["parentId"] = parentId;
+        domElement[name]["uniqueId"] = name + "-" + cleanAttributes(domElement[name]["attributes"]);
+        domElement[name]["coordinates"]["x"] = coordinates["x"] - rootElementLoc["x"];
+        domElement[name]["coordinates"]["y"] = coordinates["y"] - rootElementLoc["y"];
+        domElement[name]["coordinates"]["height"] = coordinates["height"];
+        domElement[name]["coordinates"]["width"] = coordinates["width"];
+    }
+
+    pageParsedDom = iterateDomElements(rootElement, "", 0, 0, 1);
+    
+    return [
+        pageParsedDom,
+        totalDomElementParsed
+    ];
     
 }
 
 export const parseWebPage = async (page: Page, filename: string, selector?: any) => {
-    console.log('In paseWebPages');
-
     console.log(`\n\n********  PARSING DOM  ********`);
     const result = await page.evaluate(parseHTMLAndKeepRelations, selector);
     console.log(`filename, selector: ${filename}, ${selector}`);
-    const compressedResult = compress(result[0]);
-    // compress;
-    // const compressedResult = result[0];
+    // const compressedResult = compress(result[0]);
+    compress;
+    const compressedResult = result[0];
     fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
     return result[0];
 }
