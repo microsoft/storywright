@@ -50,7 +50,7 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         let nthChild = 0;
         if(node.hasChildNodes()){
             for(const childNode of node.childNodes){
-                if(childNode.tagName && !(childNode.tagName.toLowerCase() == "script")){
+                if(childNode.tagName && !(["script", "style"].includes(childNode.tagName.toLowerCase()))){
                     domElement[name]["childNodes"].push(iterateDomElements(childNode, domElement[name]["path"], id+1, id+1, ++nthChild));
                 }
             }
@@ -62,7 +62,9 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         let uniqueStr = "";
         Object.entries(attr).forEach((entry) => {
             const [key, value] = entry;
-            uniqueStr += `${key}:${value}*`
+            if(!["class"].includes(key)){
+                uniqueStr += `${key}:${value}*`;
+            }
         });
         return uniqueStr;
     }
@@ -112,14 +114,15 @@ const parseHTMLAndKeepRelations = (selector: string) => {
         const coordinates = node.getBoundingClientRect();
         domElement[name]["attributes"] = findElementAttributes(node);
         domElement[name]["cssProps"] = findAppliedCSSOnElement(node);
+        // findAppliedCSSOnElement(node);
         domElement[name]["found"] = false;
         domElement[name]["elementId"] = id;
         domElement[name]["parentId"] = parentId;
         domElement[name]["uniqueId"] = name + "-" + cleanAttributes(domElement[name]["attributes"]);
-        domElement[name]["coordinates"]["x"] = coordinates["x"] - rootElementLoc["x"];
-        domElement[name]["coordinates"]["y"] = coordinates["y"] - rootElementLoc["y"];
-        domElement[name]["coordinates"]["height"] = coordinates["height"];
-        domElement[name]["coordinates"]["width"] = coordinates["width"];
+        domElement[name]["coordinates"]["x"] = Math.round(coordinates["x"] - rootElementLoc["x"]);
+        domElement[name]["coordinates"]["y"] = Math.round(coordinates["y"] - rootElementLoc["y"]);
+        domElement[name]["coordinates"]["height"] = Math.round(coordinates["height"]);
+        domElement[name]["coordinates"]["width"] = Math.round(coordinates["width"]);
     }
 
     pageParsedDom = iterateDomElements(rootElement, "", 0, 0, 1);
@@ -131,13 +134,19 @@ const parseHTMLAndKeepRelations = (selector: string) => {
     
 }
 
-export const parseWebPage = async (page: Page, filename: string, selector?: any) => {
+export const parseWebPage = async (page: Page, filename: string, selector?: any, shouldCompress: boolean=false) => {
     console.log(`\n\n********  PARSING DOM  ********`);
     const result = await page.evaluate(parseHTMLAndKeepRelations, selector);
     console.log(`filename, selector: ${filename}, ${selector}`);
-    // const compressedResult = compress(result[0]);
-    compress;
-    const compressedResult = result[0];
+
+    let compressedResult = {};
+
+    if(shouldCompress){
+        compressedResult = compress(result[0]);
+    }else {
+        compressedResult = result[0];
+    }
+    
     fs.writeFileSync(filename, JSON.stringify(compressedResult), "utf-8");
     return result[0];
 }
