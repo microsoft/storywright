@@ -276,7 +276,7 @@ export class PlayWrightExecutor {
       });
       console.log(`saving snapshot`);
       if(this.options.parseDom){
-        await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "")    ;
+        await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "", this.options.compressDom);
       }
     } catch (err) {
       console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
@@ -295,7 +295,7 @@ export class PlayWrightExecutor {
           path: screenshotPath,
         });
         if(this.options.parseDom){
-          await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt" , selector);
+          await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt" , selector, this.options.compressDom);
         }
       } else {
         console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");

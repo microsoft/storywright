@@ -142,8 +142,10 @@ export const parseWebPage = async (page: Page, filename: string, selector?: any,
     let compressedResult = {};
 
     if(shouldCompress){
+        console.log("Compressing DOM");
         compressedResult = compress(result[0]);
     }else {
+        console.log("Not compressing DOM");
         compressedResult = result[0];
     }
     
