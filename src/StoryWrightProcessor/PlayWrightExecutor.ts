@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { Page } from "playwright";
 import { sep } from "path";
 import { StoryWrightOptions } from "./StoryWrightOptions";
-import { parseWebPage } from "../DOMDiffing/parseDomPlaywright";
+import { parseWebPage } from "domdiffing";
 
 /**
  * Class containing playwright exposed functions.
