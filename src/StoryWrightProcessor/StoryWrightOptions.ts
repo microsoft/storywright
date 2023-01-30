@@ -5,6 +5,8 @@ export interface StoryWrightOptions {
   url: string;
   screenShotDestPath: string;
   browsers: Array<string>;
+  parseDom: boolean;
+  compressDom: boolean;
   headless: boolean;
   concurrency: number;
   skipSteps: boolean;

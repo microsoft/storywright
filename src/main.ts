@@ -36,6 +36,22 @@ const args = argv
     },
     choices: [BrowserName.Chromium, BrowserName.Firefox, BrowserName.Webkit],
   })
+  .option("parseDom", {
+    alias: "parseDom",
+    default: false,
+    describe:
+      "Parse DOM/CSS information of page and store it in a file.",
+    nargs: 1,
+    type: "boolean"
+  })
+  .option("compressDom", {
+    alias: "compressDom",
+    default: false,
+    describe:
+      "Compress DOM/CSS information of page",
+    nargs: 1,
+    type: "boolean"
+  })
   .option("headless", {
     alias: "headless",
     default: false,
@@ -103,6 +119,8 @@ console.log(`Concurrency = ${args.concurrency}`);
 console.log(`Cores available on system  = ${cpus().length}`);
 console.log(`SkipSteps = ${args.skipSteps}`);
 console.log(`WaitTimeScreenshot = ${args.waitTimeScreenshot}`);
+console.log(`Parse DOM = ${args.parseDom}`);
+console.log(`Compress DOM = ${args.compressDom}`);
 console.log(
   `================ Starting story right execution =================`
 );
@@ -111,6 +129,8 @@ const storyWrightOptions: StoryWrightOptions = {
   url: url,
   screenShotDestPath: args.destpath,
   browsers: args.browsers,
+  parseDom: args.parseDom,
+  compressDom: args.compressDom,
   headless: args.headless,
   concurrency: args.concurrency,
   skipSteps: args.skipSteps,

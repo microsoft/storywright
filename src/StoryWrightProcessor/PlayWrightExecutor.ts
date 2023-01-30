@@ -2,6 +2,8 @@ import * as fs from "fs";
 import { Page } from "playwright";
 import { sep } from "path";
 import { StoryWrightOptions } from "./StoryWrightOptions";
+import { parseWebPage } from "domdiffing";
+
 /**
  * Class containing playwright exposed functions.
  */
@@ -272,6 +274,10 @@ export class PlayWrightExecutor {
       await this.page.screenshot({
         path: screenshotPath,
       });
+      console.log(`saving snapshot`);
+      if(this.options.parseDom){
+        await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "", this.options.compressDom);
+      }
     } catch (err) {
       console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
       throw err;
@@ -284,11 +290,13 @@ export class PlayWrightExecutor {
       let element = await this.page.$(selector);
       if (await element.isVisible()) {
         let screenshotPath = this.getScreenshotPath(testName);
-
         await this.checkIfPageIsBusy(screenshotPath);
         await element.screenshot({
           path: screenshotPath,
         });
+        if(this.options.parseDom){
+          await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt" , selector, this.options.compressDom);
+        }
       } else {
         console.log("ERROR: Element NOT VISIBLE: CAPTURING PAGE");
         await this.makeScreenshot(testName);
