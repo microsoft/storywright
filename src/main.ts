@@ -138,4 +138,5 @@ const storyWrightOptions: StoryWrightOptions = {
   totalPartitions: args.totalPartitions,
   waitTimeScreenshot: args.waitTimeScreenshot
 };
+
 StoryWrightProcessor.process(storyWrightOptions);

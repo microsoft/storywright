@@ -5,8 +5,7 @@ import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
 import { partitionArray } from "../utils";
 import { sep } from "path";
-// import * as fs from "fs";
-// import { compareDoms } from "domdiffing/lib/domDiffingEngine";
+
 /**
  * Class containing StoryWright operations
  */
