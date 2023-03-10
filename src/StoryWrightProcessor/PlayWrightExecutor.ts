@@ -276,7 +276,7 @@ export class PlayWrightExecutor {
       });
       console.log(`saving snapshot`);
       if(this.options.parseDom){
-        await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "", this.options.compressDom);
+        await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "html", this.options.compressDom);
       }
     } catch (err) {
       console.error("ERROR: PAGE_SCREENSHOT: ", err.message);
