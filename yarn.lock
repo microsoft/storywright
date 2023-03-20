@@ -81,10 +81,10 @@ csstype@^3.0.2:
   resolved "https://registry.npmjs.org/csstype/-/csstype-3.0.8.tgz"
   integrity sha512-jXKhWqXPmlUeoQnF/EhTtTl4C9SnrxSH/jZUih3jmO6lBKr99rP3/+FmrMj4EFpOXzMtXHAZkd3x0E6h6Fgflw==
 
-domdiffing@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/domdiffing/-/domdiffing-0.0.6.tgz#8dbf4ab62b9ea2d28a38752c679a1c1536f8d708"
-  integrity sha512-aFdr9YmZpcSwkh7H/N7JsDnwDyH4VrcZxF4BIRBdxSj3pHlH7BDo67LqHxb0n2H9PdA6EG4aUavdsER7+paCUQ==
+domdiffing@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/domdiffing/-/domdiffing-0.0.7.tgz#021a1a99f89517f0a3b1aac74efe9bfdf3d8e14e"
+  integrity sha512-eSbkgE5mJamRFByrN+ykr94eSggtRVDVWCGUEaOvi9UsWpSprhMoD5u0K+Z8QcxqW1B53JoNA257tuT0rve8WA==
   dependencies:
     compress-json "^2.1.1"
     playwright "^1.11.1"
