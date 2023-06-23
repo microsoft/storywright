@@ -14,7 +14,11 @@
     "inlineSourceMap": false,
     "declarationMap": false,
     "composite": true,
-    "tsBuildInfoFile": "./lib/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./lib/tsconfig.tsbuildinfo",
+    "lib": [
+      "esnext",
+      "dom"
+    ]
   },
   "include": ["./src"]
 }

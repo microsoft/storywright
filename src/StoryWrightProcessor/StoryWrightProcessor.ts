@@ -4,7 +4,8 @@ import { BrowserUtils } from "./BrowserUtils";
 import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
 import { partitionArray } from "../utils";
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
+import { fileURLToPath } from "url";
 
 /**
  * Class containing StoryWright operations
@@ -31,7 +32,26 @@ export class StoryWrightProcessor {
         const page: Page = await context.newPage();
         var getStoriesScript = readFileSync(__dirname + '/GetStories.js', 'utf8');
         await page.goto(join(options.url, "iframe.html"));
-        let stories: object[] = await page.evaluate(getStoriesScript);
+        let stories: object[];
+        try
+        {
+          stories = await page.evaluate(getStoriesScript);
+        }
+        catch (err)
+        {
+          // If getting stories from ifram.html is not sucessfull for storybook 7, try to get stories from stories.json
+          const storiesJsonPath = fileURLToPath(join(options.url, "stories.json"));
+          if(!existsSync(storiesJsonPath))
+          {
+            console.log("stories.json not found at ", storiesJsonPath);
+            throw err;
+          }
+          const rawStoriesObject: { stories: unknown } = require(storiesJsonPath);
+          stories = Object.values(
+            rawStoriesObject.stories ?? {}
+          );
+          console.log(`${stories.length} stories found`);
+        }
         if (options.totalPartitions > 1) {
           console.log(
             "Starting partitioning with ",
@@ -63,9 +83,9 @@ export class StoryWrightProcessor {
           await Promise.all(
             itemsForBatch.map(async (story: object) => {
               const id: string = story["id"];
-
+              
               // Set story category and name as prefix for screenshot name.
-              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replace("/", "-").replace("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
+              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replaceAll("/", "-").replaceAll("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let context: BrowserContext;
               try {
                 context = await browser.newContext();

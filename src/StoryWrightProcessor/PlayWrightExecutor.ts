@@ -345,19 +345,19 @@ export class PlayWrightExecutor {
   };
 
   private getScreenshotPath(testName?: String) {
-    this.ssNamePrefix = this.ssNamePrefix.replace(/:/g, "-");
-    this.ssNamePrefix = this.ssNamePrefix.replace(/=/g, " ");
-    this.ssNamePrefix = this.ssNamePrefix.replace(/\"/g, " ");
-    this.ssNamePrefix = this.ssNamePrefix.replace(/</g, " ");
-    this.ssNamePrefix = this.ssNamePrefix.replace(/>/g, " ");
+    this.ssNamePrefix = this.ssNamePrefix.replaceAll(/:/g, "-");
+    this.ssNamePrefix = this.ssNamePrefix.replaceAll(/=/g, " ");
+    this.ssNamePrefix = this.ssNamePrefix.replaceAll(/\"/g, " ");
+    this.ssNamePrefix = this.ssNamePrefix.replaceAll(/</g, " ");
+    this.ssNamePrefix = this.ssNamePrefix.replaceAll(/>/g, " ");
     let screenshotPath: string;
 
     if (testName) {
-      testName = testName.replace(/:/g, "-");
-      testName = testName.replace(/=/g, " ");
-      testName = testName.replace(/\"/g, " ");
-      testName = testName.replace(/</g, " ");
-      testName = testName.replace(/>/g, " ");
+      testName = testName.replaceAll(/:/g, "-");
+      testName = testName.replaceAll(/=/g, " ");
+      testName = testName.replaceAll(/\"/g, " ");
+      testName = testName.replaceAll(/</g, " ");
+      testName = testName.replaceAll(/>/g, " ");
       screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
       screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`);
