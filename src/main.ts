@@ -36,6 +36,16 @@ const args = argv
     },
     choices: [BrowserName.Chromium, BrowserName.Firefox, BrowserName.Webkit],
   })
+  .option("skipDomParsing", {
+    alias: "skipDomParsing",
+    default: [],
+    describe: "Comma seperated list of Story names to skip DOM parsing",
+    nargs: 1,
+    type: "array",
+    coerce: (array) => {
+      return array.flatMap((v) => v.split(","));
+    },
+  })
   .option("parseDom", {
     alias: "parseDom",
     default: false,
@@ -129,6 +139,7 @@ const storyWrightOptions: StoryWrightOptions = {
   url: url,
   screenShotDestPath: args.destpath,
   browsers: args.browsers,
+  skipDomParsing: args.skipDomParsing,
   parseDom: args.parseDom,
   compressDom: args.compressDom,
   headless: args.headless,

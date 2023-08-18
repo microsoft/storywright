@@ -275,7 +275,10 @@ export class PlayWrightExecutor {
         path: screenshotPath,
       });
       console.log(`saving snapshot`);
-      if(this.options.parseDom){
+      
+      console.log(`this.options.skipDomParsing: ${this.options.skipDomParsing}`);
+      console.log(`testName: ${this.ssNamePrefix.split(" ")[0]}`);
+      if(this.options.parseDom && !this.options.skipDomParsing.includes(this.ssNamePrefix.split(" ")[0])){
         await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt", "html", this.options.compressDom);
       }
     } catch (err) {
@@ -294,7 +297,9 @@ export class PlayWrightExecutor {
         await element.screenshot({
           path: screenshotPath,
         });
-        if(this.options.parseDom){
+        console.log(`this.options.skipDomParsing: ${this.options.skipDomParsing}`);
+        console.log(`testName: ${this.ssNamePrefix.split(" ")[0]}`);
+        if(this.options.parseDom && !this.options.skipDomParsing.includes(this.ssNamePrefix.split(" ")[0])){
           await parseWebPage(this.page, screenshotPath.replace(".png", "") + ".txt" , selector, this.options.compressDom);
         }
       } else {
