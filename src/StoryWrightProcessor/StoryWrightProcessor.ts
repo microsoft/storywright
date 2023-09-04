@@ -1,11 +1,10 @@
-import { join } from "path";
+import { join, resolve } from "path";
 import { Browser, BrowserContext, Page } from "playwright";
 import { BrowserUtils } from "./BrowserUtils";
 import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
 import { partitionArray } from "../utils";
-import { readFileSync, existsSync } from 'fs';
-import { fileURLToPath } from "url";
+import { readFileSync, existsSync } from "fs";
 
 /**
  * Class containing StoryWright operations
@@ -15,6 +14,7 @@ export class StoryWrightProcessor {
    *
    * @param options Storywright processing options
    */
+
   public static async process(options: StoryWrightOptions) {
     let startTime = Date.now();
     console.log("StoryWright processor started @ ", new Date());
@@ -30,26 +30,39 @@ export class StoryWrightProcessor {
         );
         const context = await browser.newContext();
         const page: Page = await context.newPage();
-        var getStoriesScript = readFileSync(__dirname + '/GetStories.js', 'utf8');
-        await page.goto(join(options.url, "iframe.html"));
+
+        const STORY_URL = "https://stories/";
+        await page.route(`${STORY_URL}**`, async (route, request) => {
+          const url = request.url();
+          const urlPath = url.slice(STORY_URL.length).split("?")[0].split("/");
+          const path = join(options.url, ...urlPath);
+          if (existsSync(path)) {
+            route.fulfill({ path });
+          } else {
+            console.log(`Local file not found -> Abort request for ${url}`);
+            route.abort();
+          }
+        });
+
+        var getStoriesScript = readFileSync(
+          __dirname + "/GetStories.js",
+          "utf8"
+        );
+        await page.goto(join(STORY_URL, "iframe.html"));
         let stories: object[];
-        try
-        {
+        try {
           stories = await page.evaluate(getStoriesScript);
-        }
-        catch (err)
-        {
+        } catch (err) {
           // If getting stories from ifram.html is not sucessfull for storybook 7, try to get stories from stories.json
-          const storiesJsonPath = fileURLToPath(join(options.url, "stories.json"));
-          if(!existsSync(storiesJsonPath))
-          {
+          const storiesJsonPath = resolve(options.url, "stories.json");
+          if (!existsSync(storiesJsonPath)) {
             console.log("stories.json not found at ", storiesJsonPath);
             throw err;
           }
-          const rawStoriesObject: { stories: unknown } = require(storiesJsonPath);
-          stories = Object.values(
-            rawStoriesObject.stories ?? {}
-          );
+          const rawStoriesObject: {
+            stories: unknown;
+          } = require(storiesJsonPath);
+          stories = Object.values(rawStoriesObject.stories ?? {});
           console.log(`${stories.length} stories found`);
         }
         if (options.totalPartitions > 1) {
@@ -72,6 +85,7 @@ export class StoryWrightProcessor {
         }
         await page.close();
         console.log(`${stories.length} stories found`);
+        //options.url = "dist/storybook";
         let storyIndex = 0;
         let position = 0;
         while (position < stories.length) {
@@ -83,13 +97,33 @@ export class StoryWrightProcessor {
           await Promise.all(
             itemsForBatch.map(async (story: object) => {
               const id: string = story["id"];
-              
+
               // Set story category and name as prefix for screenshot name.
-              const ssNamePrefix = `${story["kind"]}.${story["name"]}`.replaceAll("/", "-").replaceAll("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
+              const ssNamePrefix = `${story["kind"]}.${story["name"]}`
+                .replaceAll("/", "-")
+                .replaceAll("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
               let context: BrowserContext;
               try {
                 context = await browser.newContext();
                 const page = await context.newPage();
+                const STORY_URL = "https://stories/";
+                await page.route(`${STORY_URL}**`, async (route, request) => {
+                  const url = request.url();
+                  const urlPath = url
+                    .slice(STORY_URL.length)
+                    .split("?")[0]
+                    .split("/");
+                  const path = join(options.url, ...urlPath);
+                  if (existsSync(path)) {
+                    route.fulfill({ path });
+                  } else {
+                    console.log(
+                      `Local file not found -> Abort request for ${url}`
+                    );
+                    route.abort();
+                  }
+                });
+
                 // TODO : Move these values in config.
                 // TODO : Expose a method in Steps to set viewport size.
                 await page.setViewportSize({
@@ -113,11 +147,17 @@ export class StoryWrightProcessor {
 
                 //TODO: Take screenshots when user doesn't want steps to be executed.
                 if (options.skipSteps) {
-
                 } else {
-                  const playWrightExecutor: PlayWrightExecutor = new PlayWrightExecutor(page, ssNamePrefix, browserName, options, story);
+                  const playWrightExecutor: PlayWrightExecutor =
+                    new PlayWrightExecutor(
+                      page,
+                      ssNamePrefix,
+                      browserName,
+                      options,
+                      story
+                    );
                   await playWrightExecutor.exposeFunctions();
-                  await page.goto(join(options.url, `iframe.html?id=${id}`));
+                  await page.goto(join(STORY_URL, `iframe.html?id=${id}`));
                   await playWrightExecutor.processStory();
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
                 }

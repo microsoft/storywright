@@ -3,7 +3,7 @@ import * as argv from "yargs";
 import { BrowserName } from "./StoryWrightProcessor/Constants";
 import { StoryWrightOptions } from "./StoryWrightProcessor/StoryWrightOptions";
 import { StoryWrightProcessor } from "./StoryWrightProcessor/StoryWrightProcessor";
-import { resolve } from "path";
+//import { resolve } from "path";
 import {cpus} from "os";
 
 const args = argv
@@ -91,11 +91,11 @@ const args = argv
 // When http(s) storybook url is passed no modification required.
 // When file path is provided it needs to be converted to absolute path and file:/// needs to be added to support firefox browser.
 
-const url: string =
-  args.url.indexOf("http") > -1 ? args.url : "file:///" + resolve(args.url);
+//const url: string =
+  //args.url.indexOf("http") > -1 ? args.url : "file:///" + resolve(args.url);
 
 console.log(`================ StoryWright params =================`);
-console.log(`Storybook url = ${url}`);
+console.log(`Storybook url = ${args.url}`);
 console.log(`Screenshot destination path = ${args.destpath}`);
 console.log(`Browsers = ${args.browsers}`);
 console.log(`Headless = ${args.headless}`);
@@ -108,7 +108,7 @@ console.log(
 );
 
 const storyWrightOptions: StoryWrightOptions = {
-  url: url,
+  url: args.url,
   screenShotDestPath: args.destpath,
   browsers: args.browsers,
   headless: args.headless,
