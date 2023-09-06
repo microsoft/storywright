@@ -111,10 +111,7 @@ export class PlayWrightExecutor {
       // Check if the network or CPU are idle
       await this.page.waitForLoadState("load");
       await this.page.waitForLoadState("networkidle");
-      await this.page.evaluate(`new Promise(resolve => {
-        window.requestIdleCallback(() => { resolve(); });
-      })`);
-
+      
       // Busy pending timeout is not expected so log it.
       if (busy.pendingTimeouts < 0) {
         console.log(`ERRR : Pending timeouts less than 0 ${busy.pendingTimeouts}`);
