@@ -102,6 +102,15 @@ export class StoryWrightProcessor {
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`
                 .replaceAll("/", "-")
                 .replaceAll("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
+              for(let excludePattern of options.excludePatterns){
+                // regex test to check if exclude pattern is present in ssNamePrefix
+                let regex = new RegExp(excludePattern);
+                if(regex.test(ssNamePrefix)){
+                  console.log(`Skipping story ${ssNamePrefix} as it matches exclude pattern ${excludePattern}`);
+                  return;
+                }
+              }
+
               let context: BrowserContext;
               try {
                 context = await browser.newContext();

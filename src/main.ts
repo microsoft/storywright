@@ -36,6 +36,16 @@ const args = argv
     },
     choices: [BrowserName.Chromium, BrowserName.Firefox, BrowserName.Webkit],
   })
+  .option("excludePatterns", {
+    alias: "excludePatterns",
+    default: [BrowserName.Chromium, BrowserName.Firefox],
+    describe: "Comma seperated list of StoryName regex pattern to be excluded",
+    nargs: 1,
+    type: "array",
+    coerce: (array) => {
+      return array.flatMap((v) => v.split(","));
+    }
+  })
   .option("headless", {
     alias: "headless",
     default: false,
@@ -103,6 +113,7 @@ console.log(`Concurrency = ${args.concurrency}`);
 console.log(`Cores available on system  = ${cpus().length}`);
 console.log(`SkipSteps = ${args.skipSteps}`);
 console.log(`WaitTimeScreenshot = ${args.waitTimeScreenshot}`);
+console.log(`ExcludePatterns = ${args.excludePatterns}`);
 console.log(
   `================ Starting story right execution =================`
 );
@@ -116,7 +127,8 @@ const storyWrightOptions: StoryWrightOptions = {
   skipSteps: args.skipSteps,
   partitionIndex: args.partitionIndex,
   totalPartitions: args.totalPartitions,
-  waitTimeScreenshot: args.waitTimeScreenshot
+  waitTimeScreenshot: args.waitTimeScreenshot,
+  excludePatterns: args.excludePatterns
 };
 
 StoryWrightProcessor.process(storyWrightOptions);

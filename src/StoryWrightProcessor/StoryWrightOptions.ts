@@ -11,4 +11,5 @@ export interface StoryWrightOptions {
   partitionIndex: number;
   totalPartitions: number;
   waitTimeScreenshot: number;
+  excludePatterns: Array<string>;
 }
