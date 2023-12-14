@@ -97,7 +97,11 @@ export class StoryWrightProcessor {
           await Promise.all(
             itemsForBatch.map(async (story: object) => {
               const id: string = story["id"];
-
+              const tags: string = story["tags"];
+              if(tags && tags.includes("no-screenshot")){
+                console.log(`StoryId: ${id} has tag no-screenshot hence skipping.`);
+                return;
+              }
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`
                 .replaceAll("/", "-")
