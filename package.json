@@ -2,7 +2,7 @@
   "name": "storywright",
   "description": "Storybook setup.",
   "license": "MIT",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "main": "lib/index.js",
   "module": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -18,18 +18,22 @@
   },
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@types/react": "^17.0.30",
     "domdiffing": "^0.0.9",
     "playwright": "^1.11.1",
-    "react": "^17.0.2",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
+    "react": "~18.2.0",
+    "@types/react": "^18.2.17",
     "@types/node": "^15.6.1",
     "@types/yargs": "^15.0.13",
     "compress-json": "^2.1.1",
     "prettier": "^2.3.2",
     "typescript": "^4.1.2"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.2 <19.0.0",
+    "@types/react": ">=17.0.8 <19.0.0"
   },
   "sideEffects": false
 }
