@@ -28,8 +28,8 @@
     "@types/node": "^15.6.1",
     "@types/yargs": "^15.0.13",
     "compress-json": "^2.1.1",
-    "prettier": "^2.8.4",
-    "typescript": "5.3.3"
+    "prettier": "^2.3.2",
+    "typescript": "^4.1.2"
   },
   "sideEffects": false
 }
