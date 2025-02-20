@@ -12,13 +12,13 @@ const args = argv
   .usage("Usage: $0 [options]")
   .example([
     [
-    "$0",
-    "Captures screenshot for all stories using default static storybook path dist/iframe.html"
+      "$0",
+      "Captures screenshot for all stories using default static storybook path dist/iframe.html",
     ],
     [
-    "$0 -url https://localhost:5555 --browsers chromium",
-    "Captures screenshot for all stories from given storybook url for chromium browser"
-    ]
+      "$0 -url https://localhost:5555 --browsers chromium",
+      "Captures screenshot for all stories from given storybook url for chromium browser",
+    ],
   ])
   .option("url", {
     alias: "storybookurl",
@@ -52,7 +52,7 @@ const args = argv
     type: "array",
     coerce: (array) => {
       return array.flatMap((v) => v.split(","));
-    }
+    },
   })
   .option("headless", {
     default: false,
@@ -89,8 +89,7 @@ const args = argv
   .option("waitTimeScreenshot", {
     alias: "waitTimeScreenshot",
     default: 1000,
-    describe:
-      "Time to wait before taking screenshot",
+    describe: "Time to wait before taking screenshot",
     nargs: 1,
     type: "number",
   })
@@ -100,15 +99,26 @@ const args = argv
       "Fail process if errors occurred while processing Stories or during making screenshots. Useful to make sure that your VR Test are valid and in CI scenarios.",
     type: "boolean",
   })
-  .strict(true)
-  .argv;
-
+  .option("stepsApi", {
+    /**
+     * NOTE: next major will use `parameters` as default
+     */
+    default: "component" as StoryWrightOptions["stepsApi"],
+    describe: [
+      "Configure which API should be used to define Story Steps.",
+      "NOTE: 'component' will be removed in next major to support Storybook 9",
+      "NOTE: 'parameters' will work only with CSF3 format of your Stories. Decorators containing StoryWright component won't be processed",
+    ].join("\n"),
+    type: "string",
+    choices: ["component", "parameters"],
+  })
+  .strict(true).argv;
 
 // When http(s) storybook url is passed no modification required.
 // When file path is provided it needs to be converted to absolute path and file:/// needs to be added to support firefox browser.
 
 //const url: string =
-  //args.url.indexOf("http") > -1 ? args.url : "file:///" + resolve(args.url);
+//args.url.indexOf("http") > -1 ? args.url : "file:///" + resolve(args.url);
 
 console.log(`================ StoryWright params =================`);
 console.log(`Storybook url = ${args.url}`);
@@ -135,7 +145,8 @@ const storyWrightOptions: StoryWrightOptions = {
   totalPartitions: args.totalPartitions,
   waitTimeScreenshot: args.waitTimeScreenshot,
   excludePatterns: args.excludePatterns,
-  bailOnStoriesError: args.bailOnStoriesError
+  bailOnStoriesError: args.bailOnStoriesError,
+  stepsApi: args.stepsApi,
 };
 
 StoryWrightProcessor.process(storyWrightOptions);

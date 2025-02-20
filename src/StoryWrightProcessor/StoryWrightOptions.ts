@@ -12,5 +12,9 @@ export interface StoryWrightOptions {
   totalPartitions: number;
   waitTimeScreenshot: number;
   excludePatterns: Array<string>;
-  bailOnStoriesError: boolean
+  bailOnStoriesError: boolean;
+  /**
+   * NOTE: `component` is deprecated and will be removed in next major. SB will no longer support exposing storyFn() so we won't be able to obtain dynamically steps from <StoryWright/> props.
+   */
+  stepsApi: "component" | "parameters";
 }

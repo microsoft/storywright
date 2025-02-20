@@ -1,23 +1,10 @@
 // @ts-check
 
-/**
-    * @typedef {{
-                argTypeTargetsV7:boolean;
-                buildStoriesJson:boolean;
-                disallowImplicitActionsInRenderV8: boolean;
-                legacyDecoratorFileOrder: boolean;
-                storyStoreV7?: boolean;
-                warnOnLegacyHierarchySeparator: boolean
-            }} SbFeatures
-*/
-
-
-
 getStoriesWithSteps();
 
 function getStoriesWithSteps() {
   /**
-   * @type {SbFeatures}
+   * @type {import('../utils').StorybookFeatures}
    */
   const storybookFeatures = window["FEATURES"];
 
@@ -103,7 +90,7 @@ function findSteps(res) {
 
 /**
  *
- * @param {SbFeatures} features
+ * @param {import('../utils').StorybookFeatures} features
  * @returns {Promise<Array<import('../utils').Story>>}
  */
 function getPageStories(features) {

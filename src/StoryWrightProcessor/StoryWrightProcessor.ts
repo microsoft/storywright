@@ -48,10 +48,12 @@ export class StoryWrightProcessor {
 
         let stories: Story[];
         try {
-          const getStoriesScript = readFileSync(
-            join(__dirname, "GetStories.js"),
-            "utf8"
-          );
+          const scriptKind = {
+            component: join(__dirname, "GetStories.js"),
+            parameters: join(__dirname, "GetStoriesV2.js"),
+          };
+          const getStoriesScriptPath = scriptKind[options.stepsApi];
+          const getStoriesScript = readFileSync(getStoriesScriptPath, "utf8");
           const { storiesWithSteps, errors } = await page.evaluate<{
             storiesWithSteps: Story[];
             errors: string[];
