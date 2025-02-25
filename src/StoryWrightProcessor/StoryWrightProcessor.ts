@@ -3,7 +3,7 @@ import { Browser, BrowserContext, Page } from "playwright";
 import { BrowserUtils } from "./BrowserUtils";
 import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
-import { partitionArray } from "../utils";
+import { partitionArray, Story } from "../utils";
 import { readFileSync, existsSync } from "fs";
 
 /**
@@ -45,13 +45,32 @@ export class StoryWrightProcessor {
         });
 
         await page.goto(join(STORY_URL, "iframe.html"));
-        let stories: object[];
+
+        let stories: Story[];
         try {
           const getStoriesScript = readFileSync(
-            join(__dirname,"GetStories.js"),
+            join(__dirname, "GetStories.js"),
             "utf8"
           );
-          stories = await page.evaluate(getStoriesScript);
+          const { storiesWithSteps, errors } = await page.evaluate<{
+            storiesWithSteps: Story[];
+            errors: string[];
+          }>(getStoriesScript);
+          stories = storiesWithSteps;
+
+          if (errors.length) {
+            console.warn('-'.repeat(60));
+            console.warn(
+              `🚨 [${errors.length}] errors occurred while processing Stories to obtain Steps definitions:\n`
+            );
+            console.warn(errors.join('\n'));
+            console.warn('-'.repeat(60),'\n');
+
+            if(options.bailOnStoriesError){
+              process.exit(1)
+            }
+          }
+
         } catch (err) {
           // If getting stories from ifram.html is not sucessfull for storybook 7, try to get stories from stories.json
           // NOTE: this wont process Steps !
@@ -65,7 +84,7 @@ export class StoryWrightProcessor {
           } = require(storiesJsonPath);
           stories = Object.values(rawStoriesObject.stories ?? {});
           console.log(`${stories.length} stories found`);
-          console.warn('NOTE: stories Steps will not be processed')
+          console.warn("NOTE: stories Steps will not be processed");
         }
         if (options.totalPartitions > 1) {
           console.log(
@@ -97,22 +116,26 @@ export class StoryWrightProcessor {
             position + options.concurrency
           );
           await Promise.all(
-            itemsForBatch.map(async (story: object) => {
-              const id: string = story["id"];
-              const tags: string = story["tags"];
-              if(tags && tags.includes("no-screenshot")){
-                console.log(`StoryId: ${id} has tag no-screenshot hence skipping.`);
+            itemsForBatch.map(async (story: Story) => {
+              const id = story["id"];
+              const tags = story["tags"];
+              if (tags && tags.includes("no-screenshot")) {
+                console.log(
+                  `StoryId: ${id} has tag no-screenshot hence skipping.`
+                );
                 return;
               }
               // Set story category and name as prefix for screenshot name.
               const ssNamePrefix = `${story["kind"]}.${story["name"]}`
                 .replaceAll("/", "-")
                 .replaceAll("\\", "-"); //INFO: '/' or "\\" in screenshot name creates a folder in screenshot location. Replacing with '-'
-              for(let excludePattern of options.excludePatterns){
+              for (let excludePattern of options.excludePatterns) {
                 // regex test to check if exclude pattern is present in ssNamePrefix
                 let regex = new RegExp(excludePattern);
-                if(regex.test(ssNamePrefix)){
-                  console.log(`Skipping story ${ssNamePrefix} as it matches exclude pattern ${excludePattern}`);
+                if (regex.test(ssNamePrefix)) {
+                  console.log(
+                    `Skipping story ${ssNamePrefix} as it matches exclude pattern ${excludePattern}`
+                  );
                   return;
                 }
               }
@@ -180,6 +203,10 @@ export class StoryWrightProcessor {
                 console.log(
                   `**ERROR** for story ${ssNamePrefix} ${story["id"]} ${storyIndex}/${stories.length} ${err}`
                 );
+
+                if(options.bailOnStoriesError){
+                  process.exit(1);
+                }
               } finally {
                 if (context != null) {
                   await context.close();

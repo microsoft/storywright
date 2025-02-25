@@ -4,12 +4,22 @@ import { BrowserName } from "./StoryWrightProcessor/Constants";
 import { StoryWrightOptions } from "./StoryWrightProcessor/StoryWrightOptions";
 import { StoryWrightProcessor } from "./StoryWrightProcessor/StoryWrightProcessor";
 //import { resolve } from "path";
-import {cpus} from "os";
+import { cpus } from "os";
 
 const args = argv
+  .help()
+  .alias("help", "h")
   .usage("Usage: $0 [options]")
-  .help("h")
-  .alias("h", "help")
+  .example([
+    [
+    "$0",
+    "Captures screenshot for all stories using default static storybook path dist/iframe.html"
+    ],
+    [
+    "$0 -url https://localhost:5555 --browsers chromium",
+    "Captures screenshot for all stories from given storybook url for chromium browser"
+    ]
+  ])
   .option("url", {
     alias: "storybookurl",
     default: "dist",
@@ -26,7 +36,6 @@ const args = argv
     type: "string",
   })
   .option("browsers", {
-    alias: "browsers",
     default: [BrowserName.Chromium, BrowserName.Firefox],
     describe: "Comma seperated list of browsers to support",
     nargs: 1,
@@ -37,7 +46,6 @@ const args = argv
     choices: [BrowserName.Chromium, BrowserName.Firefox, BrowserName.Webkit],
   })
   .option("excludePatterns", {
-    alias: "excludePatterns",
     default: [BrowserName.Chromium, BrowserName.Firefox],
     describe: "Comma seperated list of StoryName regex pattern to be excluded",
     nargs: 1,
@@ -47,7 +55,6 @@ const args = argv
     }
   })
   .option("headless", {
-    alias: "headless",
     default: false,
     describe:
       "True if browser needs to be launched in headless mode else false",
@@ -67,14 +74,12 @@ const args = argv
     type: "number",
   })
   .option("concurrency", {
-    alias: "concurrency",
     default: 8,
     describe: "Number of browser tabs to open in parallel",
     nargs: 1,
     type: "number",
   })
   .option("skipSteps", {
-    alias: "skipSteps",
     default: false,
     describe:
       "Take Screenshot of all Storybook stories with/without wrapped component",
@@ -89,14 +94,15 @@ const args = argv
     nargs: 1,
     type: "number",
   })
-  .example(
-    "$0",
-    "Captures screenshot for all stories using default static storybook path dist/iframe.html"
-  )
-  .example(
-    "$0 -url https://localhost:5555 --browsers chromium",
-    "Captures screenshot for all stories from given storybook url for chromium browser"
-  ).argv;
+  .option("bailOnStoriesError", {
+    default: false,
+    describe:
+      "Fail process if errors occurred while processing Stories or during making screenshots. Useful to make sure that your VR Test are valid and in CI scenarios.",
+    type: "boolean",
+  })
+  .strict(true)
+  .argv;
+
 
 // When http(s) storybook url is passed no modification required.
 // When file path is provided it needs to be converted to absolute path and file:/// needs to be added to support firefox browser.
@@ -128,7 +134,8 @@ const storyWrightOptions: StoryWrightOptions = {
   partitionIndex: args.partitionIndex,
   totalPartitions: args.totalPartitions,
   waitTimeScreenshot: args.waitTimeScreenshot,
-  excludePatterns: args.excludePatterns
+  excludePatterns: args.excludePatterns,
+  bailOnStoriesError: args.bailOnStoriesError
 };
 
 StoryWrightProcessor.process(storyWrightOptions);

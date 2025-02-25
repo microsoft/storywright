@@ -9,12 +9,6 @@ import type { Step } from "../StoryWright/Steps";
 export class StepsExecutor {
   public static async executesteps(steps: Step[], executor: PlayWrightExecutor) {
 
-    if (steps === null || steps === undefined || steps.length == 0) {
-      console.log(`Steps object is ${steps}`);
-      await executor.makeScreenshot();
-      await executor.done();
-      return;
-    }
     if (steps[0]["type"] !== StepType.SaveScreenshot && steps[0]["type"] !== StepType.CropScreenshot) {
       await executor.makeScreenshot(steps[0].name);
     }

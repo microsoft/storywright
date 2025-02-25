@@ -3,7 +3,7 @@ import { Page } from "playwright";
 import { sep } from "path";
 import { StoryWrightOptions } from "./StoryWrightOptions";
 import { StepsExecutor } from "./StepsExecutor";
-import type { Step } from "../StoryWright/Steps";
+import type { Story } from "../utils";
 /**
  * Class containing playwright exposed functions.
  */
@@ -26,7 +26,7 @@ export class PlayWrightExecutor {
     private ssNamePrefix: string,
     private browserName: string,
     private options: StoryWrightOptions,
-    private story: {steps?: Step[]}
+    private story: Story
   ) {
   }
 
@@ -155,8 +155,17 @@ export class PlayWrightExecutor {
 
   public async processStory() {
     const steps = this.story.steps;
+
     try {
+      if (steps === null || steps === undefined || steps.length == 0) {
+        await this.makeScreenshot();
+        await this.done();
+        return;
+      }
+
+      console.info(`steps: ${this.story.id} - start`);
       await StepsExecutor.executesteps(steps, this);
+      console.info(`steps: ${this.story.id} - end`);
     } catch (err) {
       console.error("ERROR: completed steps: ", err.message);
       throw err;
@@ -304,7 +313,7 @@ export class PlayWrightExecutor {
   public hover = async (selector: string) => {
     try {
       selector = this.curateSelector(selector);
-      const element = await this.page.$(selector);
+      const element = await this.page.waitForSelector(selector);
       await element.hover({
         force: true,
       });

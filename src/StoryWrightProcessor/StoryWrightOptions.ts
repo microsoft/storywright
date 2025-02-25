@@ -12,4 +12,5 @@ export interface StoryWrightOptions {
   totalPartitions: number;
   waitTimeScreenshot: number;
   excludePatterns: Array<string>;
+  bailOnStoriesError: boolean
 }

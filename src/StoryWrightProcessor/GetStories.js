@@ -11,6 +11,8 @@
             }} SbFeatures
 */
 
+
+
 getStoriesWithSteps();
 
 function getStoriesWithSteps() {
@@ -20,31 +22,62 @@ function getStoriesWithSteps() {
   const storybookFeatures = window["FEATURES"];
 
   return getPageStories(storybookFeatures).then((stories) => {
-    let ret = [];
+    /**
+     * @type {typeof stories}
+     */
+    const storiesWithSteps = [];
+    /**
+     * @type {string[]} story ids that failed while processing storyFn
+     */
+    const errors = [];
     for (let story of stories) {
       try {
-        if (typeof story.storyFn === "function") {
+        if (usesNewParametersApi(story)) {
+          const steps = story.parameters.storyWright.steps;
+          if (Array.isArray(steps)) {
+            story.steps = steps;
+          }
+        } else if (usesOldStoryFnCall(story)) {
           let res = story.storyFn();
-          let steps = findSteps(res);
-          if (steps !== "undefined" && steps !== null) {
+          const steps = findSteps(res);
+          if (steps !== undefined && steps !== null) {
             story.steps = steps;
           }
         }
       } catch (ex) {
-        console.error("Error processing render() method of:", story["id"]);
+        errors.push(story["id"]);
+        console.error("Error processing render() method of: " + story["id"]);
         console.error(ex);
       }
-      ret.push(story);
+
+      storiesWithSteps.push(story);
     }
 
-    return ret;
+    return { storiesWithSteps, errors };
   });
 }
 
 /**
  *
- * @param {Record<string,any>} res
+ * @param {import('../utils').Story} story
  * @returns
+ */
+function usesNewParametersApi(story) {
+  return story.parameters && story.parameters.storyWright;
+}
+/**
+ *
+ * @param {import('../utils').Story} story
+ * @returns
+ */
+function usesOldStoryFnCall(story) {
+  return typeof story.storyFn === "function";
+}
+
+/**
+ *
+ * @param {Record<string,any>} res
+ * @returns {import('../utils').Story['steps'] | undefined}
  */
 function findSteps(res) {
   if (res.props && res.props.isStowrWrightComponent === true) {
@@ -71,7 +104,7 @@ function findSteps(res) {
 /**
  *
  * @param {SbFeatures} features
- * @returns {Promise<Array<Record<string,unknown>>>}
+ * @returns {Promise<Array<import('../utils').Story>>}
  */
 function getPageStories(features) {
   /**
