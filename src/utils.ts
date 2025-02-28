@@ -14,8 +14,23 @@ export interface Story {
   tags: string[];
   name: string;
   kind: string;
-  parameters?:  import("./StoryWright/Steps").StoryParameters;
-  steps?: import('./StoryWright/Steps').Step[];
+  parameters?: import("./StoryWright/Steps").StoryParameters;
+  steps?: import("./StoryWright/Steps").Step[];
+  /**
+   * @deprecated - will be removed in next major. won't exist with `componentApi: 'parameters'`
+   */
   storyFn?: () => unknown;
   [key: string]: unknown;
+}
+
+export interface StorybookFeatures {
+  /**
+   * @deprecated - will be removed in next major. SB v8 doesn't support this anymore
+   */
+  argTypeTargetsV7: boolean;
+  buildStoriesJson: boolean;
+  disallowImplicitActionsInRenderV8: boolean;
+  legacyDecoratorFileOrder: boolean;
+  storyStoreV7?: boolean;
+  warnOnLegacyHierarchySeparator: boolean;
 }
