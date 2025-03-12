@@ -230,7 +230,7 @@ export interface Step {
 }
 
 interface Parameters {
- [name: string]: any
+  [name: string]: any;
 }
 
 export interface StoryParameters extends Parameters {

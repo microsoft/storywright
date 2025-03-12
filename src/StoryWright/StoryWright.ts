@@ -1,5 +1,5 @@
 import { createElement, Fragment } from "react";
-var PropTypes = require('prop-types');
+var PropTypes = require("prop-types");
 /**
  * Wrapper react component
  * @param p
@@ -12,9 +12,9 @@ export const StoryWright = (p) => {
 StoryWright.propTypes = {
   children: PropTypes.any,
   steps: PropTypes.array,
-  isStowrWrightComponent: PropTypes.bool
+  isStowrWrightComponent: PropTypes.bool,
 };
 
 StoryWright.defaultProps = {
-  isStowrWrightComponent: true
+  isStowrWrightComponent: true,
 };

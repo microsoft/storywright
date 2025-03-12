@@ -61,18 +61,17 @@ export class StoryWrightProcessor {
           stories = storiesWithSteps;
 
           if (errors.length) {
-            console.warn('-'.repeat(60));
+            console.warn("-".repeat(60));
             console.warn(
               `🚨 [${errors.length}] errors occurred while processing Stories to obtain Steps definitions:\n`
             );
-            console.warn(errors.join('\n'));
-            console.warn('-'.repeat(60),'\n');
+            console.warn(errors.join("\n"));
+            console.warn("-".repeat(60), "\n");
 
-            if(options.bailOnStoriesError){
-              process.exit(1)
+            if (options.bailOnStoriesError) {
+              process.exit(1);
             }
           }
-
         } catch (err) {
           // If getting stories from ifram.html is not sucessfull for storybook 7, try to get stories from stories.json
           // NOTE: this wont process Steps !
@@ -206,7 +205,7 @@ export class StoryWrightProcessor {
                   `**ERROR** for story ${ssNamePrefix} ${story["id"]} ${storyIndex}/${stories.length} ${err}`
                 );
 
-                if(options.bailOnStoriesError){
+                if (options.bailOnStoriesError) {
                   process.exit(1);
                 }
               } finally {

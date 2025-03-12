@@ -12,8 +12,7 @@ class Busy {
     public pendingTimeouts: number,
     public pendingNetworkMap: Map<string, number>,
     public pendingDom: number
-  ) {
-  }
+  ) {}
 }
 
 export class PlayWrightExecutor {
@@ -27,31 +26,27 @@ export class PlayWrightExecutor {
     private browserName: string,
     private options: StoryWrightOptions,
     private story: Story
-  ) {
-  }
+  ) {}
 
   public async getIsPageBusyMethod() {
-
     const busy = new Busy(0, new Map<string, number>(), 0);
 
-    this.page.on('request', (request) => {
+    this.page.on("request", (request) => {
       const url = request.url();
       const networkCount = busy.pendingNetworkMap.get(url);
       if (!networkCount || networkCount === 0) {
         busy.pendingNetworkMap.set(url, 1);
-      }
-      else {
+      } else {
         busy.pendingNetworkMap.set(url, networkCount + 1);
       }
     });
 
-    this.page.on('response', (response) => {
+    this.page.on("response", (response) => {
       const url = response.url();
       const networkCount = busy.pendingNetworkMap.get(url);
       if (networkCount <= 1) {
         busy.pendingNetworkMap.delete(url);
-      }
-      else {
+      } else {
         busy.pendingNetworkMap.set(url, networkCount - 1);
       }
     });
@@ -59,21 +54,24 @@ export class PlayWrightExecutor {
     // Mainting set here instead in page initscript becuase its easy to debug and view logs here
     const timeoutIdSet = new Set();
 
-    await this.page.exposeFunction("__pwBusy__", (key: string, timeoutId: number) => {
-      if (key === "timeouts++") {
-        timeoutIdSet.add(timeoutId);
-        busy.pendingTimeouts++;
-      } else if (key === "timeouts--") {
-        if (timeoutIdSet.has(timeoutId)) {
-          timeoutIdSet.delete(timeoutId);
-          busy.pendingTimeouts--;
+    await this.page.exposeFunction(
+      "__pwBusy__",
+      (key: string, timeoutId: number) => {
+        if (key === "timeouts++") {
+          timeoutIdSet.add(timeoutId);
+          busy.pendingTimeouts++;
+        } else if (key === "timeouts--") {
+          if (timeoutIdSet.has(timeoutId)) {
+            timeoutIdSet.delete(timeoutId);
+            busy.pendingTimeouts--;
+          }
+        } else if (key === "dom++") {
+          busy.pendingDom++;
+        } else if (key === "dom--") {
+          busy.pendingDom--;
         }
-      } else if (key === "dom++") {
-        busy.pendingDom++;
-      } else if (key === "dom--") {
-        busy.pendingDom--;
       }
-    });
+    );
 
     await this.page.addInitScript(`{
       const _setTimeout = window.setTimeout;
@@ -114,14 +112,16 @@ export class PlayWrightExecutor {
 
       // Busy pending timeout is not expected so log it.
       if (busy.pendingTimeouts < 0) {
-        console.log(`ERRR : Pending timeouts less than 0 ${busy.pendingTimeouts}`);
+        console.log(
+          `ERRR : Pending timeouts less than 0 ${busy.pendingTimeouts}`
+        );
       }
       return busy;
     };
-  };
+  }
 
   private delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async checkIfPageIsBusy(screenshotPath: string) {
@@ -134,21 +134,30 @@ export class PlayWrightExecutor {
       // Also on hover activities where just some background changes its difficult for test author to write such waiting mechanism hence adding default 1 second wait.
       await this.delay(this.options.waitTimeScreenshot);
       busy = await this.isPageBusy();
-      isBusy = busy.pendingTimeouts + busy.pendingNetworkMap.size + busy.pendingDom > 0;
+      isBusy =
+        busy.pendingTimeouts + busy.pendingNetworkMap.size + busy.pendingDom >
+        0;
     } while (isBusy && Date.now() < timeout);
 
     if (isBusy) {
       if (busy.pendingTimeouts > 0) {
-        console.log(`E2223 : Page busy. Pending timeouts for ${this.page.url()} Path = ${screenshotPath}`);
-      }
-      else if (busy.pendingNetworkMap.size > 0) {
-        console.log(`E2223 : Page busy. Pending network for ${this.page.url()} Path = ${screenshotPath} PendingUrls = ${JSON.stringify(Array.from(busy.pendingNetworkMap))}`);
-      }
-      else if (busy.pendingDom > 0) {
-        console.log(`E2223 : Page busy. Pending dom for ${this.page.url()} Path = ${screenshotPath}`);
-      }
-      else {
-        console.log(`E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`)
+        console.log(
+          `E2223 : Page busy. Pending timeouts for ${this.page.url()} Path = ${screenshotPath}`
+        );
+      } else if (busy.pendingNetworkMap.size > 0) {
+        console.log(
+          `E2223 : Page busy. Pending network for ${this.page.url()} Path = ${screenshotPath} PendingUrls = ${JSON.stringify(
+            Array.from(busy.pendingNetworkMap)
+          )}`
+        );
+      } else if (busy.pendingDom > 0) {
+        console.log(
+          `E2223 : Page busy. Pending dom for ${this.page.url()} Path = ${screenshotPath}`
+        );
+      } else {
+        console.log(
+          `E2223 : Page busy for ${this.page.url()} Path = ${screenshotPath}`
+        );
       }
     }
   }
@@ -183,7 +192,7 @@ export class PlayWrightExecutor {
       console.error("ERROR: waitForTimeout: ", err.message);
       throw err;
     }
-  }
+  };
 
   public mouseUp = async () => {
     try {
@@ -232,7 +241,10 @@ export class PlayWrightExecutor {
       selector = this.curateSelector(selector);
       await this.page.keyboard.press(key);
     } catch (err) {
-      console.error(`ERROR: pressKey: selector ${selector}, key ${key}`, err.message);
+      console.error(
+        `ERROR: pressKey: selector ${selector}, key ${key}`,
+        err.message
+      );
       throw err;
     }
   };
@@ -243,7 +255,10 @@ export class PlayWrightExecutor {
       const element = await this.page.$(selector);
       await element.fill(text);
     } catch (err) {
-      console.error(`ERROR: setElementText : selector ${selector} : text ${text}`, err.message);
+      console.error(
+        `ERROR: setElementText : selector ${selector} : text ${text}`,
+        err.message
+      );
       throw err;
     }
   };
@@ -368,9 +383,13 @@ export class PlayWrightExecutor {
       testName = testName.replaceAll(/\"/g, " ");
       testName = testName.replaceAll(/</g, " ");
       testName = testName.replaceAll(/>/g, " ");
-      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(
+        `${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`
+      );
     } else {
-      screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`);
+      screenshotPath = this.removeNonASCIICharacters(
+        `${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`
+      );
     }
 
     //INFO: Append file prefix if screenshot with same name exist.
@@ -389,7 +408,6 @@ export class PlayWrightExecutor {
     return name.replace(/[^\x00-\x7F]/g, "");
   }
 
-
   /*  This will insert double quotes around selector string, if missing.
       Eg: buttonbutton[data-id=ex123][attr=ex432] will be changed to button[data-id="ex123"][attr="ex432"]
   */
@@ -407,10 +425,13 @@ export class PlayWrightExecutor {
       /*  Pulls out chars b/w equals to (=) and closing square bracket (])
           Eg: button[data-id=ex123] will give "ex123" to temp
       */
-      let temp = selector.substring(selector.indexOf("=") + 1, selector.indexOf("]"));
+      let temp = selector.substring(
+        selector.indexOf("=") + 1,
+        selector.indexOf("]")
+      );
 
       // Check if temp is not surrounded by either double/single quotes
-      if (!(temp.charAt(0) == '"' || temp.charAt(0) == '\'')) {
+      if (!(temp.charAt(0) == '"' || temp.charAt(0) == "'")) {
         temp = '"' + temp + '"';
       }
 
