@@ -11,7 +11,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "tsc -w --preserveWatchOutput"
+    "start": "tsc -w --preserveWatchOutput",
+    "format": "prettier -w src/**"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
