@@ -5,14 +5,14 @@ getStoriesWithSteps();
 function getStoriesWithSteps() {
   return getPageStories().then((stories) => {
     /**
-     * @type {typeof stories}
+     * @type {Array<import('../utils').Story>}
      */
     const storiesWithSteps = [];
     /**
      * @type {string[]} story ids that failed while processing parameters
      */
     const errors = [];
-    for (let story of stories) {
+    for (let story of Object.values(stories)) {
       try {
         const steps = story.parameters?.storyWright.steps;
         if (Array.isArray(steps)) {
@@ -33,7 +33,7 @@ function getStoriesWithSteps() {
 
 /**
  *
- * @returns {Promise<Array<import('../utils').Story>>}
+ * @returns {Promise<{[story_id:string]: import('../utils').Story}>}
  */
 function getPageStories() {
   return window["__STORYBOOK_PREVIEW__"].extract();
