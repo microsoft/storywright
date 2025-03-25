@@ -13,7 +13,10 @@ export class BrowserUtils {
   ) {
     switch (browserName) {
       case BrowserName.Chromium:
-        return await playwright.chromium.launch({ args: ["--allow-file-access-from-files"], headless });
+        return await playwright.chromium.launch({
+          args: ["--allow-file-access-from-files"],
+          headless,
+        });
       case BrowserName.Firefox:
         return await playwright.firefox.launch({ headless });
       case BrowserName.Webkit:
