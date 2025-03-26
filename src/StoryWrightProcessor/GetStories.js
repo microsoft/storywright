@@ -101,8 +101,9 @@ function getPageStories(features) {
   // NOTE:
   // storyStoreV7:
   //  - is configurable only in SB v7
-  //  - is `true` by default SB v7
-  //  - doesn't exist in SB v7 (enabled by default)
+  //  - is `true` by default SB v7 - @see https://github.com/storybookjs/storybook/blob/next/MIGRATION.md#storystorev7-enabled-by-default
+  //  - doesn't exist in SB v8 (enabled by default) - @see https://github.com/storybookjs/storybook/blob/next/MIGRATION.md#storyshots-has-been-removed
+
 
   // get page stories async obtained from multiple build chunks
   if (!supportsStoryStoreV7config || features.storyStoreV7) {
