@@ -14,7 +14,7 @@ function getStoriesWithSteps() {
     const errors = [];
     for (let story of Object.values(stories)) {
       try {
-        const steps = story.parameters?.storyWright.steps;
+        const steps = story.parameters?.storyWright?.steps;
         if (Array.isArray(steps)) {
           story.steps = steps;
         }
