@@ -54,6 +54,15 @@ export class StoryWrightProcessor {
           };
           const getStoriesScriptPath = scriptKind[options.stepsApi];
           const getStoriesScript = readFileSync(getStoriesScriptPath, "utf8");
+
+          if (options.stepsApi === "parameters") {
+            // Wait for Storybook Preview API to be available
+            // it's used in GetStoriesV2.js to access story parameters
+            await page.waitForFunction(() => {
+              return window["__STORYBOOK_PREVIEW__"];
+            });
+          }
+
           const { storiesWithSteps, errors } = await page.evaluate<{
             storiesWithSteps: Story[];
             errors: string[];
