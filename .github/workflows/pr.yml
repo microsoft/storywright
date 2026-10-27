@@ -10,6 +10,10 @@ on:
 
   workflow_dispatch:
 
+# Restrict the GITHUB_TOKEN to read-only access; this workflow builds untrusted PR code
+permissions:
+  contents: read
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -27,12 +31,15 @@ jobs:
       - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
         with:
           fetch-depth: 0
+          # Don't write the GITHUB_TOKEN into .git/config where PR code could read it
+          persist-credentials: false
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1.4.6
         with:
           node-version: ${{ matrix.node-version }}
 
-      - run: npm install
+      # Skip dependency lifecycle scripts (preinstall/install/postinstall) from untrusted PRs
+      - run: npm install --ignore-scripts
 
       - run: npm run build
