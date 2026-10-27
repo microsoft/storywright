@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { Page } from "playwright";
 import { sep } from "path";
 import { StoryWrightOptions } from "./StoryWrightOptions";
+import { isPathInsideDirectory } from "../utils";
 import { parseWebPage } from "domdiffing";
 
 /**
@@ -366,6 +367,11 @@ export class PlayWrightExecutor {
       screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${testName}.${this.browserName}`);
     } else {
       screenshotPath = this.removeNonASCIICharacters(`${this.options.screenShotDestPath}${sep}${this.ssNamePrefix}.${this.browserName}`);
+    }
+
+    // INFO: testName comes from page content, so make sure the file can't land outside the screenshot folder
+    if (!isPathInsideDirectory(this.removeNonASCIICharacters(this.options.screenShotDestPath), screenshotPath)) {
+      throw new Error(`Invalid screenshot path: ${screenshotPath}`);
     }
 
     //INFO: Append file prefix if screenshot with same name exist.
