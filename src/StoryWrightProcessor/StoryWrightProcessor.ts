@@ -3,7 +3,7 @@ import { Browser, BrowserContext, Page } from "playwright";
 import { BrowserUtils } from "./BrowserUtils";
 import { PlayWrightExecutor } from "./PlayWrightExecutor";
 import { StoryWrightOptions } from "./StoryWrightOptions";
-import { partitionArray } from "../utils";
+import { isPathInsideDirectory, partitionArray } from "../utils";
 import { sep } from "path";
 
 /**
@@ -115,9 +115,12 @@ export class StoryWrightProcessor {
                   } while (busyTime < busyTimeout && (await isPageBusy()));
 
                   console.log(`story:${++storyIndex}/${stories.length}  ${id}`);
+                  const screenshotPath = options.screenShotDestPath + sep + ssNamePrefix + ".png";
+                  if (!isPathInsideDirectory(options.screenShotDestPath, screenshotPath)) {
+                    throw new Error(`Invalid screenshot path: ${screenshotPath}`);
+                  }
                   await page.screenshot({
-                    path:
-                      options.screenShotDestPath + sep + ssNamePrefix + ".png",
+                    path: screenshotPath,
                   });
                 } else {
                   await new PlayWrightExecutor(
