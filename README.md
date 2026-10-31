@@ -6,52 +6,52 @@ Storywright is a tool to capture screenshots for [React Storybook](https://story
 
 Storywright works alongside Storybook to produce screenshots of the stories. In addition, it has capability to interact with the stories by clicking, hovering, waiting and many more actions.
 
-Storywright exposes a React component, <StoryWright>, which can be added as a decorator in stories. For eg: 
+Storywright exposes a React component, `<StoryWright>`, which can be added as a decorator in stories. For example: 
 
-If we have a button component, <Button />, and a story around that component, Button.stories.tsx, then:
+If we have a button component, `<Button />`, and a story around that component, `Button.stories.tsx`, then:
 
-In Button.stories.tsx:
+In `Button.stories.tsx`:
 
-```bash
+```tsx
 const StoryWrightDemo = (story) => 
-    <StoryWright>
-        {story()}
-    </StoryWright>
-}
+  <StoryWright>
+    {story()}
+  </StoryWright>
 
 export default {
-    title: "Button",
-    decorators: [StoryWrightDemo]
+  title: "Button",
+  decorators: [StoryWrightDemo],
 }
 
-export const ButtonStory = () => <Button></Button>
+export const ButtonStory = () => <Button />
 ```
 
 Above code will take screenshot of the whole page where Button is rendered.
 
 ### Testing Interactions
+
 To test interactions, you can add Steps to each state to interact with the UI. This is useful for clicking buttons, filling out forms, and getting the UI into the proper visual state to test.
 
 Here is an same example as above with interactions:
 
-```bash
+```tsx
 const StoryWrightDemo = (story) => 
-    <StoryWright
-        steps={new Steps()
-        click('.btn')
-        .snapshot('snapshot1')
-        .end()}
-    >
-        {story()}
-    </StoryWright>
+  <StoryWright
+    steps={new Steps()
+      .click(".btn")
+      .snapshot("snapshot1")
+      .end()}
+  >
+    {story()}
+  </StoryWright>
 }
 
 export default {
-    title: "Button",
-    decorators: [StoryWrightDemo]
+  title: "Button",
+  decorators: [StoryWrightDemo],
 }
 
-export const ButtonStory = () => <Button></Button>
+export const ButtonStory = () => <Button />
 ```
 
 Following methods are currently available:
@@ -69,6 +69,3 @@ Following methods are currently available:
 - `waitForNotFound(selector: string)`
 - `click(selector)`
 - `waitForTimeout(millisecs: number)`
-
-
-
